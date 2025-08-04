@@ -1,16 +1,16 @@
-# Mintlify Starter Kit
+# deployERP Documentation
 
-Use the starter kit to get your docs deployed and ready to customize.
+Official documentation for deployERP - the Odoo Server Management Tool.
 
-Click the green **Use this template** button at the top of this repo to copy the Mintlify starter kit. The starter kit contains examples with
+This documentation site contains comprehensive information about deployERP, including:
 
-- Guide pages
-- Navigation
-- Customizations
-- API reference pages
-- Use of popular components
+- Getting started with Odoo server deployment
+- Server management and monitoring features
+- Backup and recovery options
+- Developer tools and API reference
+- Security and compliance information
 
-**[Follow the full quickstart guide](https://starter.mintlify.com/quickstart)**
+**[Visit our main website](https://deployerp.com)**
 
 ## Development
 

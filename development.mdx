@@ -1,94 +1,213 @@
 ---
-title: 'Development'
-description: 'Preview changes locally to update your docs'
+title: 'Developer Tools'
+description: 'Integrate and extend deployERP for your Odoo development workflow'
 ---
 
 <Info>
   **Prerequisites**:
-  - Node.js version 19 or higher
-  - A docs repository with a `docs.json` file
+  - deployERP account with API access enabled
+  - Basic understanding of RESTful APIs
+  - Familiarity with Git for version control
+  - Your preferred programming language for API integration
 </Info>
 
-Follow these steps to install and run Mintlify on your operating system.
+Follow these steps to integrate deployERP into your development workflow for Odoo server management.
 
 <Steps>
-<Step title="Install the Mintlify CLI">
+<Step title="Generate API credentials">
+
+Log in to your deployERP dashboard and generate API credentials:
+
+1. Navigate to Settings > API Access
+2. Click "Generate New API Key"
+3. Save your API key and secret securely
 
 ```bash
-npm i -g mint
+# Example of storing credentials in environment variables
+export DEPLOYERP_API_KEY="your_api_key"
+export DEPLOYERP_API_SECRET="your_api_secret"
 ```
 </Step>
 
-<Step title="Preview locally">
+<Step title="Install the deployERP SDK (optional)">
 
-Navigate to your docs directory where your `docs.json` file is located, and run the following command:
+We provide SDKs for popular programming languages to simplify API integration:
 
 ```bash
-mint dev
+# For Python
+pip install deployerp-sdk
+
+# For Node.js
+npm install deployerp-sdk
+
+# For PHP
+composer require deployerp/deployerp-sdk
 ```
 
-A local preview of your documentation will be available at `http://localhost:3000`.
+You can also use the REST API directly with your preferred HTTP client.
+
+</Step>
+
+<Step title="Set up Git integration">
+
+Connect your Git repositories to deployERP for automated Odoo module deployment:
+
+1. In your deployERP dashboard, go to Developer Tools > Git Integration
+2. Add your repository URL and credentials
+3. Configure branch and deployment settings
+
+This allows deployERP to automatically deploy your Odoo modules when you push changes.
 
 </Step>
 </Steps>
 
-## Custom ports
+## API Overview
 
-By default, Mintlify uses port 3000. You can customize the port Mintlify runs on by using the `--port` flag. For example, to run Mintlify on port 3333, use this command:
-
-```bash
-mint dev --port 3333
-```
-
-If you attempt to run Mintlify on a port that's already in use, it will use the next available port:
-
-```md
-Port 3000 is already in use. Trying 3001 instead.
-```
-
-## Mintlify versions
-
-Please note that each CLI release is associated with a specific version of Mintlify. If your local preview does not align with the production version, please update the CLI:
+The deployERP API allows you to programmatically manage your Odoo servers. Here's a quick overview of the main endpoints:
 
 ```bash
-npm mint update
+# Base URL for all API requests
+BASE_URL="https://api.deployerp.com/v1"
+
+# Authentication
+AUTH_ENDPOINT="${BASE_URL}/auth/token"
+
+# Server management
+SERVERS_ENDPOINT="${BASE_URL}/servers"
+
+# Backups
+BACKUPS_ENDPOINT="${BASE_URL}/backups"
+
+# Monitoring
+MONITORING_ENDPOINT="${BASE_URL}/monitoring"
 ```
 
-## Validating links
+All API requests require authentication using your API key and secret.
 
-The CLI can assist with validating links in your documentation. To identify any broken links, use the following command:
+## Authentication
 
-```bash
-mint broken-links
+To authenticate with the deployERP API, you need to obtain an access token:
+
+```python
+# Python example using requests
+import requests
+
+auth_url = "https://api.deployerp.com/v1/auth/token"
+response = requests.post(auth_url, json={
+    "api_key": "your_api_key",
+    "api_secret": "your_api_secret"
+})
+
+token = response.json()["access_token"]
+
+# Use this token in subsequent requests
+headers = {"Authorization": f"Bearer {token}"}
 ```
 
-## Deployment
+## Server Management
 
-If the deployment is successful, you should see the following:
+Here are some common server management operations you can perform with the API:
 
-<Frame>
-  <img src="/images/checks-passed.png" alt="Screenshot of a deployment confirmation message that says All checks have passed." style={{ borderRadius: '0.5rem' }} />
-</Frame>
+```python
+# Python example for server management
+import requests
 
-## Code formatting
+base_url = "https://api.deployerp.com/v1"
+headers = {"Authorization": f"Bearer {token}"}
 
-We suggest using extensions on your IDE to recognize and format MDX. If you're a VSCode user, consider the [MDX VSCode extension](https://marketplace.visualstudio.com/items?itemName=unifiedjs.vscode-mdx) for syntax highlighting, and [Prettier](https://marketplace.visualstudio.com/items?itemName=esbenp.prettier-vscode) for code formatting.
+# List all servers
+response = requests.get(f"{base_url}/servers", headers=headers)
+servers = response.json()["data"]
+
+# Deploy a new Odoo server
+response = requests.post(f"{base_url}/servers", headers=headers, json={
+    "name": "Production Odoo",
+    "provider": "digitalocean",
+    "region": "nyc3",
+    "size": "s-2vcpu-4gb",
+    "odoo_version": "17.0",
+    "addons": ["web", "mail", "crm"]
+})
+
+# Get server details
+server_id = "srv-123456"
+response = requests.get(f"{base_url}/servers/{server_id}", headers=headers)
+```
+
+## Backup Management
+
+Manage your Odoo server backups programmatically:
+
+```python
+# Python example for backup management
+import requests
+
+base_url = "https://api.deployerp.com/v1"
+headers = {"Authorization": f"Bearer {token}"}
+server_id = "srv-123456"
+
+# Create a new backup
+response = requests.post(f"{base_url}/servers/{server_id}/backups", headers=headers)
+backup_id = response.json()["data"]["id"]
+
+# List all backups for a server
+response = requests.get(f"{base_url}/servers/{server_id}/backups", headers=headers)
+backups = response.json()["data"]
+
+# Download a backup
+backup_id = "bkp-123456"
+response = requests.get(f"{base_url}/backups/{backup_id}/download", headers=headers)
+# Handle the file download in your application
+```
+
+## Webhooks
+
+Set up webhooks to receive real-time notifications about your Odoo servers:
+
+```python
+# Python example for webhook management
+import requests
+
+base_url = "https://api.deployerp.com/v1"
+headers = {"Authorization": f"Bearer {token}"}
+
+# Create a new webhook
+response = requests.post(f"{base_url}/webhooks", headers=headers, json={
+    "url": "https://your-app.com/webhook-receiver",
+    "events": ["server.created", "server.updated", "backup.completed", "alert.triggered"],
+    "secret": "your_webhook_secret"
+})
+
+# List all webhooks
+response = requests.get(f"{base_url}/webhooks", headers=headers)
+webhooks = response.json()["data"]
+```
+
+Your application will receive JSON payloads when the specified events occur.
 
 ## Troubleshooting
 
 <AccordionGroup>
-  <Accordion title='Error: Could not load the "sharp" module using the darwin-arm64 runtime'>
+  <Accordion title='Error: Authentication failed'>
 
-    This may be due to an outdated version of node. Try the following:
-    1. Remove the currently-installed version of the CLI: `npm remove -g mint`
-    2. Upgrade to Node v19 or higher.
-    3. Reinstall the CLI: `npm i -g mint`
+    This may be due to invalid API credentials. Try the following:
+    1. Verify your API key and secret are correct
+    2. Ensure your account has API access enabled
+    3. Check if your API key has been revoked or expired
+    4. Confirm you're using the correct API endpoint
   </Accordion>
 
-  <Accordion title="Issue: Encountering an unknown error">
+  <Accordion title="Issue: Rate limiting errors">
   
-    Solution: Go to the root of your device and delete the `~/.mintlify` folder. Then run `mint dev` again.
+    The API has rate limits to prevent abuse. If you're receiving rate limit errors:
+    ```json
+    {
+      "error": "rate_limit_exceeded",
+      "message": "Rate limit exceeded. Try again in 60 seconds."
+    }
+    ```
+    Implement exponential backoff in your code and consider caching responses when appropriate.
   </Accordion>
 </AccordionGroup>
 
-Curious about what changed in the latest CLI version? Check out the [CLI changelog](https://www.npmjs.com/package/mintlify?activeTab=versions).
+For additional support, contact our [developer support team](https://app.deployerp.com/support) or visit our [API documentation](https://developers.deployerp.com/api).

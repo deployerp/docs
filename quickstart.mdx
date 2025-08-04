@@ -1,80 +1,97 @@
 ---
 title: "Quickstart"
-description: "Start building awesome documentation in minutes"
+description: "Deploy your first Odoo server in minutes"
 ---
 
 ## Get started in three steps
 
-Get your documentation site running locally and make your first customization.
+Deploy and manage your Odoo server with zero manual configuration.
 
-### Step 1: Set up your local environment
+### Step 1: Create Your Account
 
 <AccordionGroup>
-  <Accordion icon="copy" title="Clone your docs locally">
-    During the onboarding process, you created a GitHub repository with your docs content if you didn't already have one. You can find a link to this repository in your [dashboard](https://dashboard.mintlify.com).
+  <Accordion icon="user" title="Sign up for deployERP">
+    Create your deployERP account to get started:
     
-    To clone the repository locally so that you can make and preview changes to your docs, follow the [Cloning a repository](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository) guide in the GitHub docs.
+    1. Visit [app.deployerp.com](https://app.deployerp.com)
+    2. Click on "Try For Free" or "Start Free Trial"
+    3. Complete the registration form with your details
+    4. Verify your email address
+    
+    You'll get immediate access to the deployERP dashboard.
   </Accordion>
-  <Accordion icon="rectangle-terminal" title="Start the preview server">
-    1. Install the Mintlify CLI: `npm i -g mint`
-    2. Navigate to your docs directory and run: `mint dev`
-    3. Open `http://localhost:3000` to see your docs live!
+  <Accordion icon="cloud" title="Connect your cloud provider">
+    Connect your preferred cloud provider to deployERP:
     
-    <Tip>Your preview updates automatically as you edit files.</Tip>
+    1. Navigate to the "Cloud Providers" section in your dashboard
+    2. Select your provider (AWS, DigitalOcean, Azure, Vultr, Hetzner, GCP, etc.)
+    3. Follow the guided steps to connect your account via API keys
+    
+    <Tip>You can also use deployERP with your existing servers by installing our agent.</Tip>
   </Accordion>
 </AccordionGroup>
 
-### Step 2: Deploy your changes
+### Step 2: Deploy Your Odoo Server
 
 <AccordionGroup>
-  <Accordion icon="github" title="Install our GitHub app">
-    Install the Mintlify GitHub app from your [dashboard](https://dashboard.mintlify.com/settings/organization/github-app).
+  <Accordion icon="rocket" title="One-click Odoo deployment">
+    Deploy your Odoo server with just a few clicks:
     
-    Our GitHub app automatically deploys your changes to your docs site, so you don't need to manage deployments yourself.
+    1. From your dashboard, click "Deploy New Server"
+    2. Select your preferred Odoo version (e.g., Odoo 16, Odoo 17)
+    3. Choose your cloud provider and server location
+    4. Select server specifications (CPU, RAM, storage)
+    5. Click "Deploy" to launch your server
+    
+    Your Odoo server will be ready in minutes with zero manual configuration.
 </Accordion>
-<Accordion icon="palette" title="Update your site name and colors">
-    For a first change, let's update the name and colors of your docs site.
+<Accordion icon="gear" title="Server configuration">
+    Customize your Odoo server settings:
 
-    1. Open `docs.json` in your editor.
-    2. Change the `"name"` field to your project name.
-    3. Update the `"colors"` to match your brand.
-    4. Save and see your changes instantly at `http://localhost:3000`.
+    1. Access your server settings from the dashboard
+    2. Configure domain and SSL settings
+    3. Set up database parameters and server optimizations
+    4. Enable additional features like worker processes and caching
 
-    <Tip>Try changing the primary color to see an immediate difference!</Tip>
+    <Tip>All settings are pre-configured for optimal Odoo performance, but can be customized to your specific needs!</Tip>
   </Accordion>
 </AccordionGroup>
 
-### Step 3: Go live
+### Step 3: Manage Your Odoo Server
 
-<Accordion icon="rocket" title="Publish your docs">
-  1. Commit and push your changes.
-  2. Your docs will update and be live in moments!
+<Accordion icon="chart-line" title="Monitor and maintain">
+  1. Monitor server performance through the real-time dashboard
+  2. Set up automated backups with your preferred retention policy
+  3. Configure alerts for critical events or performance issues
+  4. Scale resources up or down as your needs change
+  
+  <Tip>deployERP's auto-healing features will detect and resolve many common issues automatically before they impact your Odoo instance.</Tip>
 </Accordion>
 
 ## Next steps
 
-Now that you have your docs running, explore these key features:
+Now that your Odoo server is up and running, explore these advanced features:
 
 <CardGroup cols={2}>
 
-<Card title="Write Content" icon="pen-to-square" href="/essentials/markdown">
-  Learn MDX syntax and start writing your documentation.
+<Card title="Team Access Control" icon="users" href="/features/access-control">
+  Set up role-based access for your team members and clients.
 </Card>
 
-<Card title="Customize style" icon="palette" href="/essentials/settings">
-  Make your docs match your brand perfectly.
+<Card title="Git Integration" icon="code-branch" href="/features/git-integration">
+  Connect your Git repositories for automated Odoo module deployment.
 </Card>
 
-<Card title="Add code examples" icon="square-code" href="/essentials/code">
-  Include syntax-highlighted code blocks.
+<Card title="Advanced Monitoring" icon="chart-line" href="/features/monitoring">
+  Set up custom monitoring and alerts for your Odoo servers.
 </Card>
 
-<Card title="API documentation" icon="code" href="/api-reference/introduction">
-  Auto-generate API docs from OpenAPI specs.
+<Card title="API Integration" icon="plug" href="/api-reference/introduction">
+  Automate server management with our comprehensive API.
 </Card>
 
 </CardGroup>
 
 <Note>
-  **Need help?** See our [full documentation](https://mintlify.com/docs) or join our [community](https://mintlify.com/community).
+  **Need help?** Contact our [support team](https://app.deployerp.com/support) or check our [knowledge base](https://deployerp.com/kb).
 </Note>
