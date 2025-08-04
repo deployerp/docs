@@ -11,58 +11,188 @@
   "navigation": {
     "tabs": [
       {
-        "tab": "Guides",
+        "tab": "Documentation",
         "groups": [
           {
-            "group": "Getting started",
+            "group": "Getting Started",
             "pages": [
               "index",
               "quickstart",
-              "development"
+              "concepts",
+              "pricing"
             ]
           },
           {
-            "group": "Customization",
+            "group": "Server Management",
             "pages": [
-              "essentials/settings",
-              "essentials/navigation"
+              "servers/overview",
+              "servers/provisioning",
+              "servers/providers",
+              "servers/resources",
+              "servers/monitoring",
+              "servers/ssh-keys"
             ]
           },
           {
-            "group": "Writing content",
+            "group": "Odoo Instances",
             "pages": [
-              "essentials/markdown",
-              "essentials/code",
-              "essentials/images",
-              "essentials/reusable-snippets"
+              "instances/overview",
+              "instances/creating",
+              "instances/editions",
+              "instances/configuration",
+              "instances/staging",
+              "instances/addons",
+              "instances/logs"
             ]
           },
           {
-            "group": "AI tools",
+            "group": "Backup & Recovery",
             "pages": [
-              "ai-tools/cursor",
-              "ai-tools/claude-code",
-              "ai-tools/windsurf"
+              "backups/overview",
+              "backups/providers",
+              "backups/scheduling",
+              "backups/restore",
+              "backups/s3-integration"
+            ]
+          },
+          {
+            "group": "Security",
+            "pages": [
+              "security/overview",
+              "security/access-control",
+              "security/compliance",
+              "security/audit-logs",
+              "security/data-isolation"
+            ]
+          },
+          {
+            "group": "Team Management",
+            "pages": [
+              "teams/overview",
+              "teams/roles",
+              "teams/invitations",
+              "teams/permissions"
+            ]
+          },
+          {
+            "group": "Integrations",
+            "pages": [
+              "integrations/github",
+              "integrations/ci-cd",
+              "integrations/white-label",
+              "integrations/enterprise"
+            ]
+          },
+          {
+            "group": "Advanced",
+            "pages": [
+              "advanced/postgresql",
+              "advanced/python-versions",
+              "advanced/auto-healing",
+              "advanced/custom-domains"
             ]
           }
         ]
       },
       {
-        "tab": "API reference",
+        "tab": "API Reference",
         "groups": [
           {
-            "group": "API documentation",
+            "group": "Introduction",
             "pages": [
-              "api-reference/introduction"
+              "api/overview",
+              "api/authentication",
+              "api/rate-limits",
+              "api/errors"
             ]
           },
           {
-            "group": "Endpoint examples",
+            "group": "Servers",
             "pages": [
-              "api-reference/endpoint/get",
-              "api-reference/endpoint/create",
-              "api-reference/endpoint/delete",
-              "api-reference/endpoint/webhook"
+              "api/servers/list",
+              "api/servers/create",
+              "api/servers/get",
+              "api/servers/update",
+              "api/servers/delete",
+              "api/servers/status"
+            ]
+          },
+          {
+            "group": "Instances",
+            "pages": [
+              "api/instances/list",
+              "api/instances/create",
+              "api/instances/get",
+              "api/instances/update",
+              "api/instances/delete",
+              "api/instances/restart"
+            ]
+          },
+          {
+            "group": "Backups",
+            "pages": [
+              "api/backups/list",
+              "api/backups/create",
+              "api/backups/restore",
+              "api/backups/delete"
+            ]
+          },
+          {
+            "group": "Teams",
+            "pages": [
+              "api/teams/list",
+              "api/teams/members",
+              "api/teams/invite",
+              "api/teams/update"
+            ]
+          },
+          {
+            "group": "Webhooks",
+            "pages": [
+              "api/webhooks/overview",
+              "api/webhooks/events",
+              "api/webhooks/security"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "Guides",
+        "groups": [
+          {
+            "group": "Deployment",
+            "pages": [
+              "guides/first-deployment",
+              "guides/multi-cloud",
+              "guides/production-setup",
+              "guides/migration"
+            ]
+          },
+          {
+            "group": "Best Practices",
+            "pages": [
+              "guides/performance",
+              "guides/security-hardening",
+              "guides/backup-strategy",
+              "guides/monitoring-alerts"
+            ]
+          },
+          {
+            "group": "Use Cases",
+            "pages": [
+              "guides/agency-setup",
+              "guides/development-workflow",
+              "guides/multi-tenant",
+              "guides/disaster-recovery"
+            ]
+          },
+          {
+            "group": "Troubleshooting",
+            "pages": [
+              "guides/common-issues",
+              "guides/debugging",
+              "guides/performance-tuning",
+              "guides/faq"
             ]
           }
         ]
@@ -81,12 +211,20 @@
       {
         "label": "Support",
         "href": "https://app.deployerp.com/support"
+      },
+      {
+        "label": "Status",
+        "href": "https://status.deployerp.com"
+      },
+      {
+        "label": "Pricing",
+        "href": "https://deployerp.com/pricing"
       }
     ],
     "primary": {
       "type": "button",
       "label": "Dashboard",
-      "href": "https://app.deployerp.com/login"
+      "href": "https://app.deployerp.com"
     }
   },
   "contextual": {
@@ -106,6 +244,76 @@
       "x": "https://x.com/deployerp",
       "github": "https://github.com/deployerp",
       "linkedin": "https://linkedin.com/company/deployerp"
-    }
+    },
+    "links": [
+      {
+        "title": "Product",
+        "items": [
+          {
+            "label": "Features",
+            "href": "https://deployerp.com/features"
+          },
+          {
+            "label": "Pricing",
+            "href": "https://deployerp.com/pricing"
+          },
+          {
+            "label": "Roadmap",
+            "href": "https://deployerp.com/roadmap"
+          }
+        ]
+      },
+      {
+        "title": "Resources",
+        "items": [
+          {
+            "label": "Documentation",
+            "href": "/"
+          },
+          {
+            "label": "API Reference",
+            "href": "/api/overview"
+          },
+          {
+            "label": "Status Page",
+            "href": "https://status.deployerp.com"
+          }
+        ]
+      },
+      {
+        "title": "Company",
+        "items": [
+          {
+            "label": "About",
+            "href": "https://deployerp.com/about"
+          },
+          {
+            "label": "Blog",
+            "href": "https://deployerp.com/blog"
+          },
+          {
+            "label": "Contact",
+            "href": "https://deployerp.com/contact"
+          }
+        ]
+      },
+      {
+        "title": "Legal",
+        "items": [
+          {
+            "label": "Privacy Policy",
+            "href": "https://deployerp.com/privacy"
+          },
+          {
+            "label": "Terms of Service",
+            "href": "https://deployerp.com/terms"
+          },
+          {
+            "label": "SLA",
+            "href": "https://deployerp.com/sla"
+          }
+        ]
+      }
+    ]
   }
 }

@@ -1,0 +1,373 @@
+---
+title: "API Overview"
+description: "Complete reference for the deployERP REST API"
+---
+
+## Introduction
+
+The deployERP API is a RESTful interface that allows you to programmatically manage your Odoo infrastructure. Build custom integrations, automate deployments, and manage resources at scale.
+
+<Card title="Base URL" icon="globe">
+  ```
+  https://api.deployerp.com/v1
+  ```
+</Card>
+
+## Quick Start
+
+<Steps>
+  <Step title="Get API Key">
+    Generate an API key from your [dashboard settings](https://app.deployerp.com/settings/api)
+  </Step>
+  <Step title="Make First Request">
+    Test your connection with a simple GET request
+  </Step>
+  <Step title="Explore Endpoints">
+    Browse available endpoints and operations
+  </Step>
+</Steps>
+
+### Example Request
+
+<CodeGroup>
+```bash cURL
+curl -X GET https://api.deployerp.com/v1/servers \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json"
+```
+
+```python Python
+import requests
+
+headers = {
+    'Authorization': 'Bearer YOUR_API_KEY',
+    'Content-Type': 'application/json'
+}
+
+response = requests.get(
+    'https://api.deployerp.com/v1/servers',
+    headers=headers
+)
+
+print(response.json())
+```
+
+```javascript Node.js
+const axios = require('axios');
+
+const config = {
+  headers: {
+    'Authorization': 'Bearer YOUR_API_KEY',
+    'Content-Type': 'application/json'
+  }
+};
+
+axios.get('https://api.deployerp.com/v1/servers', config)
+  .then(response => console.log(response.data))
+  .catch(error => console.error(error));
+```
+
+```php PHP
+$ch = curl_init();
+
+curl_setopt($ch, CURLOPT_URL, "https://api.deployerp.com/v1/servers");
+curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+curl_setopt($ch, CURLOPT_HTTPHEADER, [
+    'Authorization: Bearer YOUR_API_KEY',
+    'Content-Type: application/json'
+]);
+
+$response = curl_exec($ch);
+curl_close($ch);
+
+echo $response;
+```
+</CodeGroup>
+
+## Core Concepts
+
+### Resources
+
+The API provides access to these primary resources:
+
+| Resource | Description | Base Path |
+|----------|-------------|-----------|
+| **Servers** | Virtual machines hosting Odoo | `/servers` |
+| **Instances** | Odoo installations | `/instances` |
+| **Backups** | Backup snapshots | `/backups` |
+| **Providers** | Cloud provider connections | `/providers` |
+| **Teams** | Team and user management | `/teams` |
+| **Invoices** | Billing and invoices | `/invoices` |
+
+### Request Format
+
+All requests must include:
+- **Authorization header** with Bearer token
+- **Content-Type** header set to `application/json`
+- **JSON body** for POST/PUT/PATCH requests
+
+### Response Format
+
+```json
+{
+  "success": true,
+  "data": {
+    // Response data
+  },
+  "meta": {
+    "timestamp": "2024-01-15T10:30:00Z",
+    "request_id": "req_abc123"
+  }
+}
+```
+
+## Authentication
+
+### API Keys
+
+Generate and manage API keys from your dashboard:
+
+1. Navigate to Settings → API Keys
+2. Click "Generate New Key"
+3. Set key permissions and expiry
+4. Store the key securely
+
+<Warning>
+  API keys are shown only once. Store them securely and never commit them to version control.
+</Warning>
+
+### Using API Keys
+
+Include your API key in the Authorization header:
+
+```http
+Authorization: Bearer YOUR_API_KEY
+```
+
+### Key Permissions
+
+API keys can have different permission levels:
+
+| Level | Permissions |
+|-------|------------|
+| **Read** | View resources only |
+| **Write** | Create and update resources |
+| **Delete** | Remove resources |
+| **Admin** | Full access including billing |
+
+## Rate Limiting
+
+API requests are subject to rate limits:
+
+| Plan | Requests/Hour | Burst Limit |
+|------|---------------|-------------|
+| Starter | 1,000 | 100/minute |
+| Professional | 5,000 | 500/minute |
+| Enterprise | Unlimited | Custom |
+
+### Rate Limit Headers
+
+```http
+X-RateLimit-Limit: 1000
+X-RateLimit-Remaining: 999
+X-RateLimit-Reset: 1516110000
+```
+
+### Handling Rate Limits
+
+When rate limited, you'll receive:
+
+```json
+{
+  "error": {
+    "code": "rate_limit_exceeded",
+    "message": "Too many requests",
+    "retry_after": 60
+  }
+}
+```
+
+## Pagination
+
+List endpoints support pagination:
+
+### Query Parameters
+
+| Parameter | Description | Default | Max |
+|-----------|-------------|---------|-----|
+| `page` | Page number | 1 | - |
+| `per_page` | Items per page | 20 | 100 |
+| `sort` | Sort field | created_at | - |
+| `order` | Sort order (asc/desc) | desc | - |
+
+### Paginated Response
+
+```json
+{
+  "data": [...],
+  "pagination": {
+    "current_page": 1,
+    "per_page": 20,
+    "total_pages": 5,
+    "total_items": 100,
+    "has_next": true,
+    "has_previous": false
+  }
+}
+```
+
+## Filtering
+
+Filter results using query parameters:
+
+```bash
+# Filter servers by status
+GET /v1/servers?status=running
+
+# Filter by multiple criteria
+GET /v1/instances?version=17.0&edition=enterprise
+
+# Date range filtering
+GET /v1/backups?created_after=2024-01-01&created_before=2024-01-31
+```
+
+## Webhooks
+
+Configure webhooks to receive real-time notifications:
+
+### Webhook Events
+
+| Event | Description |
+|-------|-------------|
+| `server.created` | Server provisioned |
+| `server.deleted` | Server removed |
+| `instance.deployed` | Instance ready |
+| `instance.stopped` | Instance stopped |
+| `backup.completed` | Backup finished |
+| `backup.failed` | Backup error |
+
+### Webhook Payload
+
+```json
+{
+  "event": "instance.deployed",
+  "timestamp": "2024-01-15T10:30:00Z",
+  "data": {
+    "instance_id": "inst_abc123",
+    "server_id": "srv_xyz789",
+    "status": "running"
+  }
+}
+```
+
+## Error Handling
+
+### Error Response Format
+
+```json
+{
+  "success": false,
+  "error": {
+    "code": "validation_error",
+    "message": "Invalid request parameters",
+    "details": {
+      "field": "name",
+      "reason": "Required field missing"
+    }
+  }
+}
+```
+
+### Common Error Codes
+
+| Code | HTTP Status | Description |
+|------|-------------|-------------|
+| `unauthorized` | 401 | Invalid or missing API key |
+| `forbidden` | 403 | Insufficient permissions |
+| `not_found` | 404 | Resource not found |
+| `validation_error` | 422 | Invalid request data |
+| `rate_limit_exceeded` | 429 | Too many requests |
+| `internal_error` | 500 | Server error |
+
+## Idempotency
+
+Ensure safe retries with idempotency keys:
+
+```bash
+curl -X POST https://api.deployerp.com/v1/servers \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Idempotency-Key: unique-key-123" \
+  -d '{"name": "production-server"}'
+```
+
+## API Versioning
+
+The API uses URL versioning:
+
+- Current version: `v1`
+- Version in URL: `https://api.deployerp.com/v1/...`
+- Deprecation notice: 6 months minimum
+
+## SDKs & Libraries
+
+Official SDKs available:
+
+<CardGroup cols={2}>
+  <Card title="Python SDK" icon="python" href="https://github.com/deployerp/python-sdk">
+    ```bash
+    pip install deployerp
+    ```
+  </Card>
+  <Card title="Node.js SDK" icon="node" href="https://github.com/deployerp/node-sdk">
+    ```bash
+    npm install @deployerp/sdk
+    ```
+  </Card>
+  <Card title="PHP SDK" icon="php" href="https://github.com/deployerp/php-sdk">
+    ```bash
+    composer require deployerp/sdk
+    ```
+  </Card>
+  <Card title="Go SDK" icon="golang" href="https://github.com/deployerp/go-sdk">
+    ```bash
+    go get github.com/deployerp/go-sdk
+    ```
+  </Card>
+</CardGroup>
+
+## API Playground
+
+Test API endpoints directly in your browser:
+
+<Card title="API Playground" icon="play" href="https://api.deployerp.com/playground">
+  Interactive API testing environment with live responses
+</Card>
+
+## Best Practices
+
+<AccordionGroup>
+  <Accordion title="Use pagination for large datasets">
+    Always paginate when fetching lists to avoid timeouts and reduce load.
+  </Accordion>
+  <Accordion title="Implement exponential backoff">
+    When rate limited, wait progressively longer between retries.
+  </Accordion>
+  <Accordion title="Store API keys securely">
+    Use environment variables or secret management systems.
+  </Accordion>
+  <Accordion title="Handle errors gracefully">
+    Check response status and implement proper error handling.
+  </Accordion>
+  <Accordion title="Use webhooks for real-time updates">
+    Instead of polling, use webhooks for event-driven updates.
+  </Accordion>
+</AccordionGroup>
+
+## Support
+
+Need help with the API?
+
+- **Documentation**: You're here!
+- **API Status**: [status.deployerp.com](https://status.deployerp.com)
+- **Support**: [support@deployerp.com](mailto:support@deployerp.com)
+- **Community**: [Discord](https://discord.gg/deployerp)
