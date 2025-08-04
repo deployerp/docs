@@ -268,11 +268,11 @@
         "items": [
           {
             "label": "Documentation",
-            "href": "/"
+            "href": "https://docs.deployerp.com"
           },
           {
             "label": "API Reference",
-            "href": "/api/overview"
+            "href": "https://docs.deployerp.com/api/overview"
           },
           {
             "label": "Status Page",
