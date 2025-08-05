@@ -1,0 +1,544 @@
+---
+title: "Instance Configuration"
+description: "Configure and optimize your Odoo instances for peak performance"
+---
+
+## Overview
+
+Proper configuration is crucial for Odoo performance, security, and reliability. This guide covers all configuration options available in deployERP for fine-tuning your instances.
+
+## Configuration Methods
+
+<CardGroup cols={3}>
+  <Card title="Dashboard UI" icon="desktop">
+    Visual configuration through web interface
+  </Card>
+  <Card title="Configuration Files" icon="file-code">
+    Direct editing of odoo.conf
+  </Card>
+  <Card title="API" icon="code">
+    Programmatic configuration updates
+  </Card>
+</CardGroup>
+
+## Core Configuration
+
+### Database Settings
+
+<ParamField path="db_host" type="string" default="localhost">
+  PostgreSQL server hostname
+  - Usually `localhost` for same-server database
+  - Can be remote database IP/hostname
+</ParamField>
+
+<ParamField path="db_port" type="integer" default="5432">
+  PostgreSQL server port
+</ParamField>
+
+<ParamField path="db_user" type="string" default="odoo">
+  Database user for Odoo connections
+</ParamField>
+
+<ParamField path="db_password" type="string" required>
+  Database user password (encrypted in storage)
+</ParamField>
+
+<ParamField path="db_name" type="string" required>
+  Default database name
+  - Can be comma-separated list for multi-database
+  - Use `False` to show database selector
+</ParamField>
+
+<ParamField path="db_template" type="string" default="template0">
+  Template for creating new databases
+</ParamField>
+
+### Server Settings
+
+<ParamField path="http_port" type="integer" default="8069">
+  HTTP service port (internal)
+</ParamField>
+
+<ParamField path="longpolling_port" type="integer" default="8072">
+  Longpolling/websocket port
+</ParamField>
+
+<ParamField path="proxy_mode" type="boolean" default="true">
+  Enable when behind reverse proxy
+</ParamField>
+
+<ParamField path="server_wide_modules" type="string" default="base,web">
+  Modules loaded for all databases
+</ParamField>
+
+## Performance Configuration
+
+### Worker Configuration
+
+Optimize worker settings based on server resources:
+
+```python
+# Recommended worker calculation
+workers = (cpu_cores * 2) + 1
+
+# Example configurations
+# 2 CPU cores
+workers = 5
+max_cron_threads = 2
+
+# 4 CPU cores  
+workers = 9
+max_cron_threads = 2
+
+# 8 CPU cores
+workers = 17
+max_cron_threads = 4
+```
+
+### Memory Limits
+
+Configure memory limits per worker:
+
+| Setting | Description | Calculation | Example (4GB RAM) |
+|---------|-------------|-------------|-------------------|
+| `limit_memory_soft` | Soft limit per worker | RAM * 0.8 / workers | 640 MB |
+| `limit_memory_hard` | Hard limit per worker | RAM * 0.9 / workers | 768 MB |
+
+```yaml
+# Memory configuration example
+limit_memory_soft: 671088640  # 640 MB
+limit_memory_hard: 805306368  # 768 MB
+```
+
+### Request Limits
+
+Control request processing:
+
+<ParamField path="limit_time_cpu" type="integer" default="60">
+  CPU time limit per request (seconds)
+  - Prevents runaway queries
+  - Increase for heavy computations
+</ParamField>
+
+<ParamField path="limit_time_real" type="integer" default="120">
+  Total time limit per request (seconds)
+  - Includes database wait time
+  - Should be 2x CPU limit
+</ParamField>
+
+<ParamField path="limit_request" type="integer" default="8192">
+  Maximum number of requests per worker
+  - Worker restarts after limit
+  - Prevents memory leaks
+</ParamField>
+
+## Security Configuration
+
+### Access Control
+
+<ParamField path="admin_passwd" type="string" required>
+  Master password for database operations
+  - Required for database creation/deletion
+  - Should be complex and secure
+  - Stored encrypted
+</ParamField>
+
+<ParamField path="list_db" type="boolean" default="false">
+  Show database list on login
+  - Disable for production
+  - Security best practice
+</ParamField>
+
+<ParamField path="dbfilter" type="string">
+  Database visibility filter
+  - Example: `^%d$` for subdomain matching
+  - Example: `^production` for specific prefix
+</ParamField>
+
+### Network Security
+
+```yaml
+# Security configuration
+security:
+  # IP whitelisting
+  allowed_ips:
+    - 10.0.0.0/8
+    - 192.168.1.0/24
+    - 203.0.113.0/32
+  
+  # Session configuration
+  session_timeout: 7200  # 2 hours
+  password_reset_timeout: 3600  # 1 hour
+  
+  # CORS settings
+  cors_origins: 
+    - https://app.company.com
+    - https://mobile.company.com
+```
+
+## Email Configuration
+
+### SMTP Settings
+
+Configure outgoing email:
+
+<ParamField path="smtp_server" type="string">
+  SMTP server hostname
+  - Example: `smtp.gmail.com`
+  - Example: `email-smtp.us-east-1.amazonaws.com`
+</ParamField>
+
+<ParamField path="smtp_port" type="integer" default="587">
+  SMTP server port
+  - 587 for TLS
+  - 465 for SSL
+  - 25 for unencrypted (not recommended)
+</ParamField>
+
+<ParamField path="smtp_ssl" type="boolean" default="false">
+  Use SSL/TLS encryption
+</ParamField>
+
+<ParamField path="smtp_user" type="string">
+  SMTP authentication username
+</ParamField>
+
+<ParamField path="smtp_password" type="string">
+  SMTP authentication password
+</ParamField>
+
+<ParamField path="email_from" type="string">
+  Default sender email address
+</ParamField>
+
+### Email Templates
+
+```yaml
+# Email configuration example
+email:
+  smtp_server: smtp.sendgrid.net
+  smtp_port: 587
+  smtp_user: apikey
+  smtp_password: ${SENDGRID_API_KEY}
+  email_from: noreply@company.com
+  
+  # Catchall configuration
+  catchall_domain: company.com
+  catchall_alias: catchall
+  
+  # Bounce handling
+  bounce_alias: bounce
+  bounce_address: bounce@company.com
+```
+
+## Logging Configuration
+
+### Log Levels
+
+Configure logging verbosity:
+
+<ParamField path="log_level" type="string" default="info">
+  Global log level:
+  - `critical`: Only critical errors
+  - `error`: Errors only
+  - `warn`: Warnings and above
+  - `info`: Informational messages (default)
+  - `debug`: Detailed debug information
+  - `debug_sql`: Include SQL queries
+</ParamField>
+
+<ParamField path="log_handler" type="string">
+  Specific module logging:
+  ```
+  werkzeug:CRITICAL,odoo.sql_db:DEBUG
+  ```
+</ParamField>
+
+### Log Rotation
+
+```yaml
+logging:
+  # Log file settings
+  logfile: /var/log/odoo/odoo.log
+  logrotate: true
+  
+  # Rotation settings
+  log_rotation_size: 100  # MB
+  log_rotation_count: 10  # Keep 10 files
+  
+  # Syslog integration
+  syslog: false
+  syslog_host: localhost
+  syslog_port: 514
+```
+
+## Advanced Configuration
+
+### Multiprocessing
+
+```yaml
+# Advanced multiprocessing configuration
+multiprocessing:
+  # Enable multiprocessing
+  workers: 8
+  
+  # Worker types
+  max_cron_threads: 2
+  
+  # Gevent async workers (Odoo 15+)
+  gevent_port: 8073
+  
+  # Worker recycling
+  limit_request: 8192
+  limit_time_cpu: 600
+  limit_time_real: 1200
+```
+
+### Database Options
+
+```yaml
+# Advanced database configuration
+database:
+  # Connection pooling
+  db_maxconn: 64
+  db_minconn: 2
+  
+  # Query optimization
+  osv_memory_age_limit: 1.0
+  osv_memory_count_limit: false
+  
+  # Database maintenance
+  pg_path: /usr/bin
+  unaccent: true
+```
+
+### File Storage
+
+```yaml
+# File storage configuration
+filestore:
+  # Data directory
+  data_dir: /opt/odoo/data
+  
+  # Attachment storage
+  attachment_location: file  # or 'db' for database storage
+  
+  # Maximum file size (MB)
+  max_upload_size: 128
+  
+  # Cleanup settings
+  attachment_deletion_delay: 48  # hours
+```
+
+## Module Configuration
+
+### Module Management
+
+<ParamField path="addons_path" type="string" required>
+  Comma-separated list of module directories:
+  ```
+  /opt/odoo/addons,/opt/odoo/custom-addons,/opt/odoo/enterprise
+  ```
+</ParamField>
+
+<ParamField path="upgrade_path" type="string">
+  Path to upgrade scripts directory
+</ParamField>
+
+<ParamField path="load_language" type="string">
+  Languages to load on startup:
+  ```
+  en_US,es_ES,fr_FR
+  ```
+</ParamField>
+
+### Auto-install Configuration
+
+```yaml
+modules:
+  # Server-wide modules
+  server_wide_modules: base,web
+  
+  # Auto-install on database creation
+  init_modules:
+    - sale_management
+    - purchase
+    - stock
+    - account
+  
+  # Exclude modules
+  exclude_modules:
+    - hw_*
+    - pos_*
+```
+
+## Caching Configuration
+
+### Redis Integration
+
+Enable Redis for improved performance:
+
+```yaml
+redis:
+  # Enable Redis cache
+  enable_redis: true
+  
+  # Redis connection
+  redis_host: localhost
+  redis_port: 6379
+  redis_db_index: 1
+  redis_password: ${REDIS_PASSWORD}
+  
+  # Cache settings
+  cache_timeout: 7200  # 2 hours
+  cache_max_size: 10000  # Maximum cached items
+  
+  # Session storage
+  session_redis: true
+  session_redis_prefix: odoo_session_
+```
+
+### Static Asset Caching
+
+```yaml
+assets:
+  # Asset bundling
+  bundle_assets: true
+  
+  # CDN configuration
+  cdn_enabled: true
+  cdn_url: https://cdn.company.com
+  
+  # Cache headers
+  cache_control: public, max-age=31536000
+  
+  # Compression
+  gzip_enabled: true
+  gzip_level: 6
+```
+
+## Environment-Specific Configuration
+
+### Development Settings
+
+```yaml
+# Development configuration
+dev:
+  # Debugging
+  debug_mode: true
+  log_level: debug
+  
+  # Auto-reload
+  auto_reload: true
+  
+  # Development tools
+  dev_mode: true
+  
+  # Disable caching
+  disable_cache: true
+```
+
+### Production Settings
+
+```yaml
+# Production configuration
+production:
+  # Performance
+  workers: 8
+  limit_memory_hard: 2684354560
+  
+  # Security
+  list_db: false
+  debug_mode: false
+  
+  # Reliability
+  max_cron_threads: 2
+  unaccent: true
+```
+
+## Configuration via API
+
+Update configuration programmatically:
+
+<CodeGroup>
+```bash cURL
+curl -X PATCH https://api.deployerp.com/v1/instances/{instance_id}/config \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "workers": 8,
+    "limit_memory_soft": 671088640,
+    "limit_memory_hard": 805306368,
+    "smtp_server": "smtp.sendgrid.net",
+    "smtp_port": 587
+  }'
+```
+
+```python Python
+import deployerp
+
+client = deployerp.Client(api_key="YOUR_API_KEY")
+
+instance = client.instances.update_config(
+    instance_id="inst_abc123",
+    config={
+        "workers": 8,
+        "limit_memory_soft": 671088640,
+        "limit_memory_hard": 805306368,
+        "smtp_server": "smtp.sendgrid.net",
+        "smtp_port": 587
+    }
+)
+
+print("Configuration updated successfully")
+```
+</CodeGroup>
+
+## Configuration Best Practices
+
+<AccordionGroup>
+  <Accordion title="Start Conservative">
+    Begin with default settings and adjust based on monitoring data
+  </Accordion>
+  <Accordion title="Monitor Impact">
+    Track performance metrics after each configuration change
+  </Accordion>
+  <Accordion title="Document Changes">
+    Keep a changelog of configuration modifications
+  </Accordion>
+  <Accordion title="Test Thoroughly">
+    Test configuration changes in staging before production
+  </Accordion>
+  <Accordion title="Regular Reviews">
+    Review and optimize configuration quarterly
+  </Accordion>
+</AccordionGroup>
+
+## Troubleshooting
+
+### Common Configuration Issues
+
+| Issue | Cause | Solution |
+|-------|-------|----------|
+| High memory usage | Too many workers | Reduce worker count |
+| Slow requests | Low CPU limit | Increase limit_time_cpu |
+| Connection errors | Wrong database settings | Verify db_host and credentials |
+| Email failures | SMTP misconfiguration | Check SMTP settings and firewall |
+
+### Configuration Validation
+
+```bash
+# Validate configuration
+deployerp instance validate-config --instance=production
+
+# Test specific settings
+deployerp instance test-smtp --instance=production
+deployerp instance test-db --instance=production
+```
+
+## Related Documentation
+
+- [Performance Tuning](/guides/performance)
+- [Security Hardening](/guides/security-hardening)
+- [Email Setup](/integrations/email)
+- [Redis Configuration](/advanced/redis)

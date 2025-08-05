@@ -1,0 +1,470 @@
+---
+title: "Cloud Provider Integration"
+description: "Connect and manage cloud providers with deployERP"
+---
+
+## Overview
+
+deployERP supports multiple cloud providers, giving you the flexibility to deploy Odoo servers on your preferred infrastructure. This guide covers provider setup, configuration, and management.
+
+## Supported Providers
+
+<CardGroup cols={3}>
+  <Card title="Amazon Web Services" icon="aws">
+    Enterprise-grade infrastructure with global reach
+    - 25+ regions worldwide
+    - Comprehensive services
+    - Reserved instance support
+  </Card>
+  <Card title="DigitalOcean" icon="digital-ocean">
+    Developer-friendly with simple pricing
+    - 14 data centers
+    - Predictable billing
+    - Easy management
+  </Card>
+  <Card title="Microsoft Azure" icon="microsoft">
+    Enterprise integration and hybrid cloud
+    - 60+ regions
+    - Active Directory integration
+    - Compliance certifications
+  </Card>
+  <Card title="Vultr" icon="server">
+    High-performance compute instances
+    - 25+ locations
+    - NVMe SSD storage
+    - DDoS protection
+  </Card>
+  <Card title="Hetzner Cloud" icon="cloud">
+    Cost-effective European hosting
+    - GDPR compliant
+    - German data centers
+    - Competitive pricing
+  </Card>
+  <Card title="Google Cloud" icon="google">
+    Advanced analytics and machine learning
+    - Global network
+    - Sustained use discounts
+    - Kubernetes integration
+  </Card>
+</CardGroup>
+
+## Provider Setup
+
+### Adding a Provider
+
+<Steps>
+  <Step title="Navigate to Providers">
+    Go to **Settings → Cloud Providers** in your dashboard
+  </Step>
+  <Step title="Select Provider Type">
+    Choose your cloud provider from the list
+  </Step>
+  <Step title="Enter Credentials">
+    Provide API keys or access credentials
+  </Step>
+  <Step title="Configure Settings">
+    Set default regions and preferences
+  </Step>
+  <Step title="Test Connection">
+    Verify the integration is working
+  </Step>
+</Steps>
+
+## Provider-Specific Setup
+
+### AWS Configuration
+
+<Tabs>
+  <Tab title="IAM User Method">
+    **Recommended approach using IAM user:**
+    
+    1. Create IAM user in AWS Console
+    2. Attach required policies:
+    ```json
+    {
+      "Version": "2012-10-17",
+      "Statement": [
+        {
+          "Effect": "Allow",
+          "Action": [
+            "ec2:*",
+            "iam:ListInstanceProfiles",
+            "iam:PassRole"
+          ],
+          "Resource": "*"
+        }
+      ]
+    }
+    ```
+    3. Generate access keys
+    4. Enter in deployERP:
+    
+    <ParamField path="access_key_id" type="string" required>
+      AWS Access Key ID
+    </ParamField>
+    
+    <ParamField path="secret_access_key" type="string" required>
+      AWS Secret Access Key
+    </ParamField>
+    
+    <ParamField path="default_region" type="string" default="us-east-1">
+      Default AWS region for deployments
+    </ParamField>
+  </Tab>
+  <Tab title="IAM Role Method">
+    **For enhanced security using IAM roles:**
+    
+    1. Create IAM role with trust policy:
+    ```json
+    {
+      "Version": "2012-10-17",
+      "Statement": [
+        {
+          "Effect": "Allow",
+          "Principal": {
+            "AWS": "arn:aws:iam::DEPLOYERP_ACCOUNT:root"
+          },
+          "Action": "sts:AssumeRole"
+        }
+      ]
+    }
+    ```
+    2. Attach EC2 management policies
+    3. Provide role ARN to deployERP
+  </Tab>
+</Tabs>
+
+### DigitalOcean Configuration
+
+**Setup process:**
+
+1. Generate API token in DigitalOcean dashboard
+2. Configure in deployERP:
+
+<ParamField path="api_token" type="string" required>
+  DigitalOcean personal access token with read/write scope
+</ParamField>
+
+<ParamField path="spaces_access_key" type="string">
+  Optional: For backup storage integration
+</ParamField>
+
+<ParamField path="spaces_secret_key" type="string">
+  Optional: For backup storage integration
+</ParamField>
+
+### Azure Configuration
+
+**Setup process:**
+
+1. Register application in Azure AD
+2. Create service principal
+3. Assign contributor role
+4. Configure in deployERP:
+
+<ParamField path="tenant_id" type="string" required>
+  Azure Active Directory tenant ID
+</ParamField>
+
+<ParamField path="client_id" type="string" required>
+  Application (client) ID
+</ParamField>
+
+<ParamField path="client_secret" type="string" required>
+  Client secret value
+</ParamField>
+
+<ParamField path="subscription_id" type="string" required>
+  Azure subscription ID
+</ParamField>
+
+## Provider Features Comparison
+
+| Feature | AWS | DigitalOcean | Azure | Vultr | Hetzner | GCP |
+|---------|-----|--------------|-------|-------|---------|-----|
+| **Regions** | 25+ | 14 | 60+ | 25+ | 3 | 35+ |
+| **Instance Types** | 400+ | 20+ | 200+ | 30+ | 10+ | 100+ |
+| **Block Storage** | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
+| **Load Balancers** | ✓ | ✓ | ✓ | ✓ | ✗ | ✓ |
+| **Private Networks** | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
+| **Backups** | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
+| **IPv6** | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
+| **Custom Images** | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
+
+## Managing Multiple Providers
+
+### Provider Strategy
+
+Use multiple providers for:
+
+<CardGroup cols={2}>
+  <Card title="Geographic Coverage" icon="globe">
+    Deploy closer to users worldwide
+  </Card>
+  <Card title="Cost Optimization" icon="dollar-sign">
+    Leverage regional pricing differences
+  </Card>
+  <Card title="Redundancy" icon="shield">
+    Avoid single provider dependency
+  </Card>
+  <Card title="Compliance" icon="balance-scale">
+    Meet data residency requirements
+  </Card>
+</CardGroup>
+
+### Provider Selection Logic
+
+deployERP can automatically select providers based on:
+
+```yaml
+provider_selection:
+  strategy: "least_cost"  # or "lowest_latency", "round_robin"
+  rules:
+    - region: "europe"
+      preferred_provider: "hetzner"
+    - region: "asia"
+      preferred_provider: "vultr"
+    - region: "americas"
+      preferred_provider: "digitalocean"
+  fallback: "aws"
+```
+
+## Provider Permissions
+
+### Minimum Required Permissions
+
+<Tabs>
+  <Tab title="AWS">
+    ```json
+    {
+      "Version": "2012-10-17",
+      "Statement": [
+        {
+          "Effect": "Allow",
+          "Action": [
+            "ec2:RunInstances",
+            "ec2:TerminateInstances",
+            "ec2:DescribeInstances",
+            "ec2:DescribeImages",
+            "ec2:DescribeKeyPairs",
+            "ec2:DescribeSecurityGroups",
+            "ec2:AuthorizeSecurityGroupIngress",
+            "ec2:CreateTags",
+            "ec2:DescribeVolumes",
+            "ec2:AttachVolume",
+            "ec2:CreateVolume"
+          ],
+          "Resource": "*"
+        }
+      ]
+    }
+    ```
+  </Tab>
+  <Tab title="Azure">
+    Built-in roles required:
+    - Virtual Machine Contributor
+    - Network Contributor
+    - Storage Account Contributor
+  </Tab>
+  <Tab title="GCP">
+    Required roles:
+    - Compute Instance Admin
+    - Security Admin
+    - Storage Admin
+  </Tab>
+</Tabs>
+
+## Provider Limits and Quotas
+
+### Understanding Limits
+
+Each provider has resource limits:
+
+| Provider | Default vCPU Limit | Default Instance Limit | Increase Method |
+|----------|-------------------|----------------------|-----------------|
+| AWS | 32 per region | 20 per region | Support ticket |
+| DigitalOcean | 100 total | 25 total | Account settings |
+| Azure | 20 per region | 25 per region | Portal request |
+| Vultr | 50 total | 100 total | Support ticket |
+| Hetzner | 10 per project | 50 per project | Support ticket |
+| GCP | 24 per region | 50 per region | Quota page |
+
+### Monitoring Quotas
+
+View current usage:
+
+```bash
+# Via API
+curl -X GET https://api.deployerp.com/v1/providers/{provider_id}/quotas \
+  -H "Authorization: Bearer YOUR_API_KEY"
+
+# Response
+{
+  "provider": "aws",
+  "region": "us-east-1",
+  "quotas": {
+    "vcpu": {
+      "used": 24,
+      "limit": 32,
+      "percentage": 75
+    },
+    "instances": {
+      "used": 8,
+      "limit": 20,
+      "percentage": 40
+    }
+  }
+}
+```
+
+## Cost Management
+
+### Provider Pricing Comparison
+
+Estimated monthly costs for common configurations:
+
+| Configuration | AWS | DigitalOcean | Azure | Vultr | Hetzner |
+|--------------|-----|--------------|-------|-------|---------|
+| 2 vCPU, 4GB RAM | $35 | $24 | $40 | $20 | $8 |
+| 4 vCPU, 8GB RAM | $70 | $48 | $80 | $40 | $16 |
+| 8 vCPU, 16GB RAM | $140 | $96 | $160 | $80 | $32 |
+| 16 vCPU, 32GB RAM | $280 | $192 | $320 | $160 | $64 |
+
+<Note>
+  Prices are estimates and vary by region. Additional costs may apply for storage, bandwidth, and other services.
+</Note>
+
+### Cost Optimization Tips
+
+<CardGroup cols={2}>
+  <Card title="Use Spot Instances" icon="tag">
+    Save up to 90% for non-critical workloads
+  </Card>
+  <Card title="Reserved Capacity" icon="calendar">
+    Commit to 1-3 years for significant discounts
+  </Card>
+  <Card title="Auto-scaling" icon="expand">
+    Scale down during off-peak hours
+  </Card>
+  <Card title="Regional Pricing" icon="map">
+    Deploy in lower-cost regions when possible
+  </Card>
+</CardGroup>
+
+## Provider Security
+
+### Security Best Practices
+
+1. **Credential Management**
+   - Use least-privilege access
+   - Rotate credentials regularly
+   - Never share API keys
+   - Use provider IAM when possible
+
+2. **Network Security**
+   - Configure security groups
+   - Use private networks
+   - Enable DDoS protection
+   - Implement IP whitelisting
+
+3. **Compliance**
+   - Verify provider certifications
+   - Understand data residency
+   - Review SLAs and guarantees
+   - Maintain audit logs
+
+## Troubleshooting
+
+### Common Provider Issues
+
+| Issue | Possible Cause | Solution |
+|-------|---------------|----------|
+| Authentication fails | Invalid credentials | Regenerate and update API keys |
+| Quota exceeded | Resource limits | Request quota increase |
+| Region unavailable | Service limitations | Use alternative region |
+| Slow provisioning | Provider congestion | Try different availability zone |
+| Network errors | Firewall rules | Check security group settings |
+
+### Provider Status Monitoring
+
+Check provider health:
+
+```bash
+# Check all providers
+deployerp providers status
+
+# Check specific provider
+deployerp providers status --provider=aws --region=us-east-1
+```
+
+## Provider Migration
+
+### Migrating Between Providers
+
+<Steps>
+  <Step title="Plan Migration">
+    Assess resources and dependencies
+  </Step>
+  <Step title="Create Backup">
+    Full backup of instances and data
+  </Step>
+  <Step title="Provision New Server">
+    Create server on target provider
+  </Step>
+  <Step title="Restore Data">
+    Restore instances from backup
+  </Step>
+  <Step title="Update DNS">
+    Point domains to new server
+  </Step>
+  <Step title="Verify Operation">
+    Test all functionality
+  </Step>
+  <Step title="Decommission Old">
+    Remove old server after verification
+  </Step>
+</Steps>
+
+## Advanced Provider Features
+
+### Multi-Cloud Architecture
+
+Deploy across multiple providers:
+
+```yaml
+architecture:
+  load_balancer:
+    provider: cloudflare
+    type: geographic
+  
+  regions:
+    us:
+      primary: aws
+      secondary: digitalocean
+    eu:
+      primary: hetzner
+      secondary: azure
+    asia:
+      primary: vultr
+      secondary: gcp
+```
+
+### Provider Webhooks
+
+Configure webhooks for provider events:
+
+```json
+{
+  "event": "provider.quota_warning",
+  "webhook_url": "https://your-app.com/webhooks/provider",
+  "threshold": 80,
+  "providers": ["aws", "digitalocean"]
+}
+```
+
+## Related Documentation
+
+- [Server Provisioning](/servers/provisioning)
+- [Multi-Region Deployment](/guides/multi-cloud)
+- [Cost Optimization](/guides/cost-optimization)
+- [Security Best Practices](/security/overview)

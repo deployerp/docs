@@ -1,0 +1,418 @@
+---
+title: "Server Provisioning"
+description: "Step-by-step guide to provisioning servers in deployERP"
+---
+
+## Overview
+
+Server provisioning in deployERP is a streamlined process that creates optimized infrastructure for your Odoo deployments. This guide covers everything from initial setup to advanced provisioning options.
+
+## Prerequisites
+
+Before provisioning a server, ensure you have:
+
+<CardGroup cols={2}>
+  <Card title="Cloud Provider Connected" icon="cloud">
+    At least one cloud provider configured in your account
+  </Card>
+  <Card title="Sufficient Permissions" icon="key">
+    Appropriate permissions in your cloud provider account
+  </Card>
+</CardGroup>
+
+## Provisioning Process
+
+<Steps>
+  <Step title="Select Provider">
+    Choose from your connected cloud providers
+  </Step>
+  <Step title="Configure Server">
+    Set location, size, and specifications
+  </Step>
+  <Step title="Review Settings">
+    Confirm configuration and costs
+  </Step>
+  <Step title="Deploy">
+    Initiate automated provisioning
+  </Step>
+  <Step title="Monitor Progress">
+    Track provisioning status in real-time
+  </Step>
+</Steps>
+
+## Server Configuration Options
+
+### Basic Settings
+
+<ParamField path="name" type="string" required>
+  Unique server identifier (e.g., "production-eu-1")
+  - Must be lowercase
+  - Can contain hyphens
+  - 3-50 characters
+</ParamField>
+
+<ParamField path="provider" type="string" required>
+  Cloud provider selection:
+  - `aws` - Amazon Web Services
+  - `digitalocean` - DigitalOcean
+  - `azure` - Microsoft Azure
+  - `vultr` - Vultr
+  - `hetzner` - Hetzner Cloud
+  - `gcp` - Google Cloud Platform
+</ParamField>
+
+<ParamField path="region" type="string" required>
+  Deployment region based on provider:
+  
+  **AWS Regions:**
+  - `us-east-1` - US East (N. Virginia)
+  - `eu-west-1` - EU (Ireland)
+  - `ap-southeast-1` - Asia Pacific (Singapore)
+  
+  **DigitalOcean Regions:**
+  - `nyc3` - New York
+  - `lon1` - London
+  - `sgp1` - Singapore
+</ParamField>
+
+### Server Specifications
+
+<ParamField path="size" type="string" required>
+  Server size configuration:
+  
+  | Size | vCPU | RAM | Storage | Monthly Cost* |
+  |------|------|-----|---------|---------------|
+  | `small` | 2 | 4GB | 80GB | ~$40 |
+  | `medium` | 4 | 8GB | 160GB | ~$80 |
+  | `large` | 8 | 16GB | 320GB | ~$160 |
+  | `xlarge` | 16 | 32GB | 640GB | ~$320 |
+  | `custom` | Variable | Variable | Variable | Variable |
+  
+  *Costs vary by provider and region
+</ParamField>
+
+### Advanced Options
+
+<ParamField path="python_version" type="string" default="3.10">
+  Python version for Odoo compatibility:
+  - `3.8` - For Odoo 14 and older
+  - `3.9` - For Odoo 15
+  - `3.10` - For Odoo 16-17 (recommended)
+  - `3.11` - Latest version
+</ParamField>
+
+<ParamField path="postgresql_version" type="string" default="14">
+  PostgreSQL database version:
+  - `12` - Legacy support
+  - `13` - Stable
+  - `14` - Recommended
+  - `15` - Latest features
+</ParamField>
+
+<ParamField path="storage_type" type="string" default="ssd">
+  Storage configuration:
+  - `ssd` - Standard SSD (recommended)
+  - `nvme` - High-performance NVMe
+  - `hdd` - Cost-effective HDD
+</ParamField>
+
+## Provisioning via Dashboard
+
+### Step 1: Navigate to Servers
+
+From your deployERP dashboard:
+1. Click **Servers** in the navigation
+2. Click **New Server** button
+
+### Step 2: Provider Selection
+
+<Tabs>
+  <Tab title="Existing Provider">
+    Select from your connected providers:
+    1. Choose provider from dropdown
+    2. Verify available regions
+    3. Check resource quotas
+  </Tab>
+  <Tab title="New Provider">
+    Connect a new provider:
+    1. Click "Add Provider"
+    2. Select provider type
+    3. Enter API credentials
+    4. Test connection
+  </Tab>
+</Tabs>
+
+### Step 3: Server Configuration
+
+Configure your server specifications:
+
+```yaml
+# Example configuration
+name: production-server
+provider: digitalocean
+region: nyc3
+size: large
+python_version: "3.10"
+postgresql_version: "14"
+storage_type: ssd
+```
+
+### Step 4: Review and Deploy
+
+1. Review configuration summary
+2. Verify estimated costs
+3. Check provider quotas
+4. Click **Deploy Server**
+
+## Provisioning via API
+
+<CodeGroup>
+```bash cURL
+curl -X POST https://api.deployerp.com/v1/servers \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "production-server",
+    "provider": "digitalocean",
+    "region": "nyc3",
+    "size": "large",
+    "python_version": "3.10",
+    "postgresql_version": "14"
+  }'
+```
+
+```python Python
+import deployerp
+
+client = deployerp.Client(api_key="YOUR_API_KEY")
+
+server = client.servers.create(
+    name="production-server",
+    provider="digitalocean",
+    region="nyc3",
+    size="large",
+    python_version="3.10",
+    postgresql_version="14"
+)
+
+print(f"Server ID: {server.id}")
+print(f"Status: {server.status}")
+```
+
+```javascript Node.js
+const deployerp = require('@deployerp/sdk');
+
+const client = new deployerp.Client({ apiKey: 'YOUR_API_KEY' });
+
+const server = await client.servers.create({
+  name: 'production-server',
+  provider: 'digitalocean',
+  region: 'nyc3',
+  size: 'large',
+  pythonVersion: '3.10',
+  postgresqlVersion: '14'
+});
+
+console.log(`Server ID: ${server.id}`);
+console.log(`Status: ${server.status}`);
+```
+</CodeGroup>
+
+## Provisioning Timeline
+
+Typical provisioning times by provider:
+
+| Provider | Small | Medium | Large | XLarge |
+|----------|-------|--------|-------|--------|
+| DigitalOcean | 2-3 min | 3-4 min | 4-5 min | 5-7 min |
+| AWS | 3-5 min | 4-6 min | 5-7 min | 7-10 min |
+| Azure | 5-7 min | 6-8 min | 8-10 min | 10-15 min |
+| Vultr | 2-3 min | 3-4 min | 4-5 min | 5-7 min |
+
+## Provisioning Progress
+
+Track provisioning status in real-time:
+
+### Status Indicators
+
+| Status | Description | Progress |
+|--------|-------------|----------|
+| `provisioning` | Server being created | 0-30% |
+| `configuring` | Installing software | 30-60% |
+| `optimizing` | Performance tuning | 60-80% |
+| `finalizing` | Security setup | 80-95% |
+| `running` | Ready for use | 100% |
+
+### Progress Monitoring
+
+```json
+{
+  "status": "configuring",
+  "progress": 45,
+  "current_step": "Installing PostgreSQL",
+  "steps_completed": [
+    "Server created",
+    "Network configured",
+    "OS installed"
+  ],
+  "estimated_time_remaining": "3 minutes"
+}
+```
+
+## Post-Provisioning Setup
+
+Once provisioning completes:
+
+<Steps>
+  <Step title="Verify Server Status">
+    Confirm server shows as "running"
+  </Step>
+  <Step title="Check Resources">
+    Review CPU, RAM, and storage allocation
+  </Step>
+  <Step title="Configure SSH Keys">
+    Add SSH keys for direct access
+  </Step>
+  <Step title="Set Up Monitoring">
+    Enable alerts and notifications
+  </Step>
+  <Step title="Deploy First Instance">
+    Create your first Odoo instance
+  </Step>
+</Steps>
+
+## Custom Server Provisioning
+
+For specific requirements:
+
+### Bring Your Own Server
+
+Connect existing servers:
+1. Install deployERP agent
+2. Register with platform
+3. Configure management
+4. Enable monitoring
+
+```bash
+# Install agent on existing server
+curl -sSL https://get.deployerp.com | bash
+deployerp-agent register --token=YOUR_TOKEN
+```
+
+### Custom Specifications
+
+Request custom configurations:
+- High memory instances (up to 512GB)
+- GPU-enabled servers
+- Dedicated hosts
+- Custom networking
+
+<Info>
+  Contact support for custom server configurations not available in standard options.
+</Info>
+
+## Multi-Region Deployment
+
+Deploy servers across regions:
+
+### Benefits
+- Reduced latency
+- Data sovereignty
+- Disaster recovery
+- Load distribution
+
+### Configuration
+```yaml
+regions:
+  - name: production-us
+    provider: aws
+    region: us-east-1
+    size: large
+  - name: production-eu
+    provider: aws
+    region: eu-west-1
+    size: large
+  - name: production-asia
+    provider: aws
+    region: ap-southeast-1
+    size: medium
+```
+
+## Cost Optimization
+
+### Right-Sizing
+
+Choose appropriate server sizes:
+- Monitor actual usage
+- Scale based on metrics
+- Use development servers for testing
+- Consider time-based scaling
+
+### Reserved Instances
+
+Save on long-term deployments:
+- AWS Reserved Instances
+- Azure Reserved VMs
+- Committed use discounts
+
+### Spot Instances
+
+For non-critical workloads:
+- Up to 90% cost savings
+- Suitable for development
+- Batch processing
+- Testing environments
+
+## Troubleshooting
+
+### Common Issues
+
+| Issue | Cause | Solution |
+|-------|-------|----------|
+| Provisioning fails | Quota exceeded | Increase provider limits |
+| Slow provisioning | Region congestion | Try different region |
+| Connection timeout | Network issues | Check firewall rules |
+| Invalid configuration | Unsupported options | Verify compatibility |
+
+### Error Handling
+
+```json
+{
+  "error": {
+    "code": "quota_exceeded",
+    "message": "vCPU quota exceeded in region us-east-1",
+    "details": {
+      "current_usage": 95,
+      "quota": 100,
+      "requested": 8
+    },
+    "suggested_action": "Request quota increase or use different region"
+  }
+}
+```
+
+## Best Practices
+
+<CardGroup cols={2}>
+  <Card title="Plan Capacity" icon="chart-line">
+    Estimate resource needs before provisioning
+  </Card>
+  <Card title="Use Naming Conventions" icon="tag">
+    Consistent naming for easy management
+  </Card>
+  <Card title="Document Configuration" icon="file-alt">
+    Keep records of server specifications
+  </Card>
+  <Card title="Test First" icon="flask">
+    Provision test servers before production
+  </Card>
+</CardGroup>
+
+## Next Steps
+
+After provisioning your server:
+
+- [Configure SSH access](/servers/ssh-keys)
+- [Set up monitoring](/servers/monitoring)
+- [Deploy Odoo instance](/instances/creating)
+- [Configure backups](/backups/overview)

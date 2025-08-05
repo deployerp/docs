@@ -1,0 +1,472 @@
+---
+title: "Creating Odoo Instances"
+description: "Step-by-step guide to deploying Odoo instances on your servers"
+---
+
+## Overview
+
+Creating an Odoo instance on deployERP is a streamlined process that handles all the complex configuration automatically. This guide walks you through creating, configuring, and launching your Odoo instances.
+
+## Prerequisites
+
+Before creating an instance, ensure you have:
+
+<CardGroup cols={2}>
+  <Card title="Running Server" icon="server">
+    At least one provisioned server with available resources
+  </Card>
+  <Card title="Odoo License" icon="key">
+    Enterprise license key (if deploying Enterprise edition)
+  </Card>
+</CardGroup>
+
+## Quick Create
+
+The fastest way to create an instance:
+
+<Steps>
+  <Step title="Select Server">
+    Choose a server with sufficient resources
+  </Step>
+  <Step title="Name Instance">
+    Provide a unique identifier
+  </Step>
+  <Step title="Select Version">
+    Choose Odoo version and edition
+  </Step>
+  <Step title="Deploy">
+    Click create and wait for deployment
+  </Step>
+</Steps>
+
+## Instance Configuration
+
+### Basic Settings
+
+<ParamField path="name" type="string" required>
+  Instance identifier (lowercase, alphanumeric with hyphens)
+  - Example: `production-erp`
+  - Must be unique per server
+  - 3-50 characters
+</ParamField>
+
+<ParamField path="version" type="string" required>
+  Odoo version to deploy:
+  - `17.0` - Latest version (recommended)
+  - `16.0` - Stable version
+  - `15.0` - LTS version
+  - `14.0` - Legacy support
+</ParamField>
+
+<ParamField path="edition" type="string" required>
+  Odoo edition:
+  - `community` - Open source edition
+  - `enterprise` - Commercial edition (requires license)
+</ParamField>
+
+<ParamField path="database_name" type="string" required>
+  PostgreSQL database name
+  - Default: Same as instance name
+  - Must be unique on server
+  - No special characters
+</ParamField>
+
+### Advanced Settings
+
+<ParamField path="admin_email" type="string" required>
+  Administrator email address
+  - Used for initial admin account
+  - Receives important notifications
+</ParamField>
+
+<ParamField path="language" type="string" default="en_US">
+  Default language for the instance
+  - Common options: `en_US`, `es_ES`, `fr_FR`, `de_DE`
+  - Can be changed after deployment
+</ParamField>
+
+<ParamField path="timezone" type="string" default="UTC">
+  Instance timezone
+  - Example: `America/New_York`, `Europe/London`
+  - Affects scheduling and timestamps
+</ParamField>
+
+<ParamField path="demo_data" type="boolean" default="false">
+  Install demo data
+  - Useful for testing and development
+  - Not recommended for production
+</ParamField>
+
+## Creating via Dashboard
+
+### Step 1: Navigate to Instance Creation
+
+1. Go to **Servers** in your dashboard
+2. Select the target server
+3. Click **New Instance** button
+
+### Step 2: Configure Instance
+
+<Tabs>
+  <Tab title="Basic Configuration">
+    ```yaml
+    # Basic instance configuration
+    name: production-erp
+    version: "17.0"
+    edition: enterprise
+    database_name: production_db
+    admin_email: admin@company.com
+    ```
+  </Tab>
+  <Tab title="Advanced Configuration">
+    ```yaml
+    # Advanced configuration with all options
+    name: production-erp
+    version: "17.0"
+    edition: enterprise
+    database_name: production_db
+    admin_email: admin@company.com
+    language: en_US
+    timezone: America/New_York
+    demo_data: false
+    workers: 4
+    limit_memory_soft: 2147483648
+    limit_memory_hard: 2684354560
+    ```
+  </Tab>
+</Tabs>
+
+### Step 3: Resource Allocation
+
+Choose resource allocation based on usage:
+
+| Usage Type | Workers | Memory Limit | Recommended For |
+|------------|---------|--------------|-----------------|
+| Development | 1-2 | 1-2 GB | Testing, development |
+| Small Business | 2-4 | 2-4 GB | <50 users |
+| Medium Business | 4-8 | 4-8 GB | 50-200 users |
+| Enterprise | 8-16 | 8-16 GB | 200+ users |
+
+### Step 4: Review and Deploy
+
+1. Review all settings
+2. Confirm resource availability
+3. Click **Create Instance**
+4. Monitor deployment progress
+
+## Creating via API
+
+<CodeGroup>
+```bash cURL
+curl -X POST https://api.deployerp.com/v1/instances \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "server_id": "srv_abc123",
+    "name": "production-erp",
+    "version": "17.0",
+    "edition": "enterprise",
+    "database_name": "production_db",
+    "admin_email": "admin@company.com",
+    "config": {
+      "workers": 4,
+      "timezone": "America/New_York"
+    }
+  }'
+```
+
+```python Python
+import deployerp
+
+client = deployerp.Client(api_key="YOUR_API_KEY")
+
+instance = client.instances.create(
+    server_id="srv_abc123",
+    name="production-erp",
+    version="17.0",
+    edition="enterprise",
+    database_name="production_db",
+    admin_email="admin@company.com",
+    config={
+        "workers": 4,
+        "timezone": "America/New_York"
+    }
+)
+
+print(f"Instance URL: {instance.url}")
+print(f"Admin Password: {instance.admin_password}")
+```
+
+```javascript Node.js
+const deployerp = require('@deployerp/sdk');
+
+const client = new deployerp.Client({ apiKey: 'YOUR_API_KEY' });
+
+const instance = await client.instances.create({
+  serverId: 'srv_abc123',
+  name: 'production-erp',
+  version: '17.0',
+  edition: 'enterprise',
+  databaseName: 'production_db',
+  adminEmail: 'admin@company.com',
+  config: {
+    workers: 4,
+    timezone: 'America/New_York'
+  }
+});
+
+console.log(`Instance URL: ${instance.url}`);
+console.log(`Admin Password: ${instance.adminPassword}`);
+```
+</CodeGroup>
+
+## Deployment Process
+
+### Deployment Stages
+
+Track your instance deployment:
+
+| Stage | Description | Duration |
+|-------|-------------|----------|
+| `queued` | Deployment request received | <10s |
+| `preparing` | Allocating resources | 10-30s |
+| `installing` | Installing Odoo and dependencies | 1-2 min |
+| `configuring` | Setting up database and config | 30-60s |
+| `starting` | Starting Odoo services | 20-40s |
+| `running` | Instance ready for use | - |
+
+### Deployment Progress
+
+Monitor real-time progress:
+
+```json
+{
+  "status": "configuring",
+  "progress": 75,
+  "current_step": "Creating database",
+  "steps_completed": [
+    "Resources allocated",
+    "Odoo installed",
+    "Dependencies configured"
+  ],
+  "estimated_time_remaining": "45 seconds"
+}
+```
+
+## Post-Deployment Setup
+
+### Initial Access
+
+After deployment completes:
+
+1. **Instance URL**: `https://[instance-name]-[server-id].deployerp.io`
+2. **Admin Email**: As configured
+3. **Admin Password**: Securely generated (shown once)
+
+<Warning>
+  Save the admin password immediately. For security reasons, it's shown only once and cannot be retrieved later.
+</Warning>
+
+### First Login Steps
+
+<Steps>
+  <Step title="Access Instance">
+    Navigate to your instance URL
+  </Step>
+  <Step title="Login as Admin">
+    Use admin email and provided password
+  </Step>
+  <Step title="Configure Company">
+    Set up company information and preferences
+  </Step>
+  <Step title="Install Apps">
+    Choose and install required Odoo apps
+  </Step>
+  <Step title="Create Users">
+    Add team members and set permissions
+  </Step>
+</Steps>
+
+## Custom Domain Setup
+
+### Configuring Custom Domain
+
+Use your own domain instead of the default:
+
+<Steps>
+  <Step title="Add Domain">
+    Add domain in instance settings
+  </Step>
+  <Step title="Update DNS">
+    Point domain to instance IP:
+    ```
+    Type: A
+    Name: erp
+    Value: [instance-ip]
+    TTL: 300
+    ```
+  </Step>
+  <Step title="Verify Domain">
+    Confirm domain ownership
+  </Step>
+  <Step title="Enable SSL">
+    Automatic SSL certificate provisioning
+  </Step>
+</Steps>
+
+### SSL Configuration
+
+SSL certificates are automatically managed:
+
+```yaml
+ssl:
+  provider: letsencrypt
+  auto_renew: true
+  email: admin@company.com
+  domains:
+    - erp.company.com
+    - www.erp.company.com
+```
+
+## Instance Types
+
+### Production Instances
+
+Optimized for business operations:
+- Multi-worker configuration
+- Performance optimizations
+- Automated backups
+- High availability
+- Production logging
+
+### Staging Instances
+
+For testing and validation:
+- Production-like environment
+- Separate database
+- Testing configurations
+- Debug capabilities
+- Sync with production
+
+### Development Instances
+
+For customization and development:
+- Debug mode available
+- Development tools
+- Code reloading
+- Lower resources
+- Flexible configuration
+
+## Multi-Database Setup
+
+### Creating Additional Databases
+
+Run multiple databases on one instance:
+
+```bash
+# Create new database
+deployerp instance db-create \
+  --instance=production-erp \
+  --database=test_db \
+  --copy-from=production_db
+
+# List databases
+deployerp instance db-list --instance=production-erp
+```
+
+### Database Management
+
+| Operation | Command | Description |
+|-----------|---------|-------------|
+| Create | `db-create` | New empty database |
+| Duplicate | `db-duplicate` | Copy existing database |
+| Delete | `db-delete` | Remove database |
+| Rename | `db-rename` | Change database name |
+| Backup | `db-backup` | Manual backup |
+
+## Performance Configuration
+
+### Worker Configuration
+
+Optimize based on workload:
+
+```python
+# Worker calculation
+workers = (cpu_cores * 2) + 1
+max_cron_threads = 2
+
+# Memory limits (per worker)
+limit_memory_soft = 671088640  # 640MB
+limit_memory_hard = 805306368  # 768MB
+
+# Request limits
+limit_time_cpu = 60
+limit_time_real = 120
+limit_request = 8192
+```
+
+### Caching Configuration
+
+Enable Redis for better performance:
+
+```yaml
+cache:
+  enabled: true
+  backend: redis
+  redis_host: localhost
+  redis_port: 6379
+  redis_db: 1
+  cache_timeout: 7200
+```
+
+## Troubleshooting
+
+### Common Issues
+
+| Issue | Symptoms | Solution |
+|-------|----------|----------|
+| Deployment fails | Stuck in preparing | Check server resources |
+| Cannot access | Connection refused | Verify firewall rules |
+| Slow performance | Long load times | Increase workers/memory |
+| Database error | 500 errors | Check database status |
+
+### Deployment Logs
+
+Access detailed logs:
+
+```bash
+# View deployment logs
+deployerp instance logs --instance=production-erp --deployment
+
+# Stream live logs
+deployerp instance logs --instance=production-erp --follow
+
+# Export logs
+deployerp instance logs --instance=production-erp --export
+```
+
+## Best Practices
+
+<CardGroup cols={2}>
+  <Card title="Plan Resources" icon="calculator">
+    Estimate user load and data volume
+  </Card>
+  <Card title="Use Staging" icon="flask">
+    Test changes before production
+  </Card>
+  <Card title="Configure Backups" icon="shield">
+    Set up automated backups immediately
+  </Card>
+  <Card title="Monitor Performance" icon="chart-line">
+    Watch metrics from day one
+  </Card>
+</CardGroup>
+
+## Next Steps
+
+After creating your instance:
+
+- [Configure instance settings](/instances/configuration)
+- [Install addons](/instances/addons)
+- [Set up backups](/backups/overview)
+- [Configure monitoring](/servers/monitoring)

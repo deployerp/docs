@@ -1,0 +1,538 @@
+---
+title: "Server Monitoring"
+description: "Real-time monitoring and alerting for your Odoo servers"
+---
+
+## Overview
+
+deployERP provides comprehensive monitoring capabilities to ensure your Odoo servers operate at peak performance. Monitor resources, track metrics, and receive alerts for critical events.
+
+## Monitoring Dashboard
+
+Access real-time server metrics from your dashboard:
+
+<Info>
+  Navigate to **Servers → [Server Name] → Monitoring** to view detailed metrics
+</Info>
+
+### Key Metrics
+
+<CardGroup cols={4}>
+  <Card title="CPU Usage" icon="microchip">
+    Processor utilization percentage
+  </Card>
+  <Card title="Memory" icon="memory">
+    RAM usage and available memory
+  </Card>
+  <Card title="Disk I/O" icon="hard-drive">
+    Read/write operations and latency
+  </Card>
+  <Card title="Network" icon="network-wired">
+    Bandwidth usage and connections
+  </Card>
+</CardGroup>
+
+## Metrics Collection
+
+### System Metrics
+
+deployERP collects comprehensive system metrics:
+
+| Metric | Description | Collection Interval | Retention |
+|--------|-------------|-------------------|-----------|
+| CPU Usage | Overall and per-core utilization | 30 seconds | 30 days |
+| Memory Usage | RAM, swap, and cache statistics | 30 seconds | 30 days |
+| Disk Usage | Space utilization and I/O stats | 60 seconds | 30 days |
+| Network Traffic | Inbound/outbound bandwidth | 30 seconds | 30 days |
+| Process Count | Active processes and threads | 60 seconds | 7 days |
+| Load Average | 1, 5, and 15-minute averages | 30 seconds | 30 days |
+
+### Application Metrics
+
+Odoo-specific monitoring:
+
+| Metric | Description | Collection Interval | Retention |
+|--------|-------------|-------------------|-----------|
+| HTTP Requests | Request rate and response times | 10 seconds | 7 days |
+| Database Queries | Query count and execution time | 30 seconds | 7 days |
+| Worker Status | Active, idle, and blocked workers | 30 seconds | 7 days |
+| Cache Hit Rate | Redis cache performance | 60 seconds | 7 days |
+| Error Rate | Application errors and warnings | Real-time | 30 days |
+| Active Users | Concurrent user sessions | 60 seconds | 7 days |
+
+## Real-Time Monitoring
+
+### Live Metrics View
+
+Monitor your server in real-time:
+
+```bash
+# View live metrics via CLI
+deployerp server monitor srv_abc123 --live
+
+# Output
+┌─────────────────────────────────────────────┐
+│ Server: production-eu-1                     │
+│ Status: Running | Uptime: 45d 12h 30m       │
+├─────────────────────────────────────────────┤
+│ CPU:    [████████░░░░░░░░░░] 42.5%         │
+│ Memory: [██████████████░░░░] 73.2% (11.7GB)│
+│ Disk:   [████████████░░░░░░] 61.0% (195GB) │
+│ Network: ↓ 125 Mbps ↑ 45 Mbps              │
+└─────────────────────────────────────────────┘
+```
+
+### Metric Visualization
+
+View trends and patterns:
+
+<Tabs>
+  <Tab title="Time Series">
+    Line graphs showing metric changes over time
+    - Customizable time ranges
+    - Multiple metric overlay
+    - Zoom and pan capabilities
+  </Tab>
+  <Tab title="Heatmaps">
+    Visual representation of resource usage
+    - CPU core utilization
+    - Memory allocation patterns
+    - Disk I/O hotspots
+  </Tab>
+  <Tab title="Gauges">
+    Real-time status indicators
+    - Current utilization levels
+    - Threshold warnings
+    - Peak usage markers
+  </Tab>
+</Tabs>
+
+## Alert Configuration
+
+### Creating Alerts
+
+Set up custom alerts for critical metrics:
+
+<Steps>
+  <Step title="Select Metric">
+    Choose the metric to monitor
+  </Step>
+  <Step title="Define Threshold">
+    Set warning and critical levels
+  </Step>
+  <Step title="Configure Duration">
+    Specify how long before triggering
+  </Step>
+  <Step title="Set Notifications">
+    Choose notification channels
+  </Step>
+</Steps>
+
+### Alert Types
+
+<CardGroup cols={2}>
+  <Card title="Threshold Alerts" icon="exclamation-triangle">
+    Trigger when metrics exceed limits
+    ```yaml
+    cpu_high:
+      metric: cpu_usage
+      condition: ">"
+      threshold: 80
+      duration: 5m
+    ```
+  </Card>
+  <Card title="Anomaly Alerts" icon="chart-line">
+    Detect unusual patterns
+    ```yaml
+    traffic_spike:
+      metric: network_in
+      condition: anomaly
+      sensitivity: high
+      window: 1h
+    ```
+  </Card>
+  <Card title="Availability Alerts" icon="heartbeat">
+    Monitor service uptime
+    ```yaml
+    service_down:
+      check: http_status
+      endpoint: /web/health
+      expected: 200
+      interval: 60s
+    ```
+  </Card>
+  <Card title="Composite Alerts" icon="layer-group">
+    Combine multiple conditions
+    ```yaml
+    high_load:
+      conditions:
+        - cpu_usage > 70
+        - memory_usage > 80
+        - response_time > 500ms
+    ```
+  </Card>
+</CardGroup>
+
+### Common Alert Rules
+
+```yaml
+# High CPU usage
+- name: "High CPU Usage"
+  metric: system.cpu.usage
+  condition: ">"
+  threshold: 85
+  duration: 5m
+  severity: warning
+
+# Memory pressure
+- name: "Memory Pressure"
+  metric: system.memory.usage
+  condition: ">"
+  threshold: 90
+  duration: 3m
+  severity: critical
+
+# Disk space low
+- name: "Low Disk Space"
+  metric: system.disk.usage
+  condition: ">"
+  threshold: 85
+  duration: 10m
+  severity: warning
+
+# Database connections
+- name: "Database Connection Pool"
+  metric: postgresql.connections.active
+  condition: ">"
+  threshold: 80
+  duration: 2m
+  severity: warning
+
+# Response time
+- name: "Slow Response Time"
+  metric: odoo.http.response_time
+  condition: ">"
+  threshold: 1000  # milliseconds
+  duration: 5m
+  severity: warning
+```
+
+## Notification Channels
+
+### Email Notifications
+
+Configure email alerts:
+
+```json
+{
+  "channel": "email",
+  "addresses": ["ops@company.com", "admin@company.com"],
+  "settings": {
+    "include_graphs": true,
+    "include_logs": false,
+    "batch_window": "5m"
+  }
+}
+```
+
+### Slack Integration
+
+Send alerts to Slack:
+
+```json
+{
+  "channel": "slack",
+  "webhook_url": "https://hooks.slack.com/services/xxx",
+  "settings": {
+    "channel": "#alerts",
+    "username": "deployERP Bot",
+    "icon_emoji": ":warning:",
+    "mention_users": ["@oncall"]
+  }
+}
+```
+
+### Webhook Notifications
+
+Custom webhook integration:
+
+```json
+{
+  "channel": "webhook",
+  "url": "https://your-app.com/webhooks/alerts",
+  "method": "POST",
+  "headers": {
+    "Authorization": "Bearer YOUR_TOKEN"
+  },
+  "retry": {
+    "attempts": 3,
+    "backoff": "exponential"
+  }
+}
+```
+
+## Performance Analysis
+
+### Resource Utilization Reports
+
+Generate detailed performance reports:
+
+<Tabs>
+  <Tab title="Daily Report">
+    ```
+    Daily Performance Summary - 2024-01-15
+    =====================================
+    
+    CPU Usage:
+    - Average: 45.2%
+    - Peak: 78.5% at 14:30
+    - 95th percentile: 62.0%
+    
+    Memory Usage:
+    - Average: 8.3 GB (51.9%)
+    - Peak: 12.1 GB (75.6%)
+    - Swap used: 0 GB
+    
+    Disk I/O:
+    - Read: 1.2 TB
+    - Write: 450 GB
+    - Average latency: 2.3ms
+    
+    Network:
+    - Inbound: 850 GB
+    - Outbound: 1.1 TB
+    - Peak throughput: 180 Mbps
+    ```
+  </Tab>
+  <Tab title="Weekly Trends">
+    Analyze patterns over the week:
+    - Peak usage times
+    - Resource consumption trends
+    - Capacity planning insights
+    - Optimization opportunities
+  </Tab>
+  <Tab title="Monthly Overview">
+    Long-term analysis:
+    - Growth trends
+    - Seasonal patterns
+    - Capacity forecasting
+    - Cost optimization
+  </Tab>
+</Tabs>
+
+### Query Performance
+
+Monitor database performance:
+
+```sql
+-- Top slow queries
+SELECT 
+  query,
+  calls,
+  mean_time,
+  total_time
+FROM pg_stat_statements
+ORDER BY mean_time DESC
+LIMIT 10;
+
+-- Connection statistics
+SELECT 
+  datname,
+  numbackends,
+  xact_commit,
+  xact_rollback
+FROM pg_stat_database;
+```
+
+## Auto-Healing
+
+### Automatic Recovery Actions
+
+deployERP automatically responds to common issues:
+
+| Condition | Auto-Healing Action | Notification |
+|-----------|-------------------|--------------|
+| Service down | Restart service | Alert sent |
+| High memory usage | Clear caches, restart workers | Warning sent |
+| Disk space low | Clean logs, temp files | Alert sent |
+| Database locks | Kill blocking queries | Alert sent |
+| Worker deadlock | Restart affected workers | Warning sent |
+| Network issues | Reset connections | Alert sent |
+
+### Configuring Auto-Healing
+
+```yaml
+auto_healing:
+  enabled: true
+  
+  rules:
+    - name: "Restart on crash"
+      trigger: service_down
+      action: restart_service
+      max_attempts: 3
+      cooldown: 5m
+    
+    - name: "Memory cleanup"
+      trigger: memory_usage > 85%
+      actions:
+        - clear_cache
+        - restart_workers
+      cooldown: 15m
+    
+    - name: "Disk cleanup"
+      trigger: disk_usage > 80%
+      actions:
+        - rotate_logs
+        - clean_temp_files
+      cooldown: 1h
+```
+
+## Log Management
+
+### Log Collection
+
+Centralized log collection:
+
+| Log Type | Location | Retention | Searchable |
+|----------|----------|-----------|------------|
+| Odoo logs | `/var/log/odoo/` | 30 days | Yes |
+| PostgreSQL logs | `/var/log/postgresql/` | 30 days | Yes |
+| Nginx logs | `/var/log/nginx/` | 7 days | Yes |
+| System logs | `/var/log/syslog` | 7 days | Yes |
+| deployERP agent | `/var/log/deployerp/` | 30 days | Yes |
+
+### Log Analysis
+
+Search and analyze logs:
+
+```bash
+# Search Odoo logs
+deployerp logs search --instance=production --query="ERROR" --last=1h
+
+# Tail logs in real-time
+deployerp logs tail --instance=production --filter="sale.order"
+
+# Export logs
+deployerp logs export --instance=production --from=2024-01-01 --to=2024-01-15
+```
+
+## Custom Metrics
+
+### Defining Custom Metrics
+
+Create business-specific metrics:
+
+```python
+# Custom metric example
+{
+  "name": "daily_orders",
+  "type": "gauge",
+  "query": "SELECT COUNT(*) FROM sale_order WHERE date >= CURRENT_DATE",
+  "interval": "5m",
+  "labels": {
+    "app": "odoo",
+    "module": "sales"
+  }
+}
+```
+
+### Metric Export
+
+Export metrics to external systems:
+
+<CardGroup cols={2}>
+  <Card title="Prometheus" icon="chart-line">
+    ```yaml
+    prometheus:
+      enabled: true
+      port: 9090
+      path: /metrics
+    ```
+  </Card>
+  <Card title="Datadog" icon="dog">
+    ```yaml
+    datadog:
+      enabled: true
+      api_key: "YOUR_KEY"
+      site: "datadoghq.com"
+    ```
+  </Card>
+  <Card title="New Relic" icon="chart-area">
+    ```yaml
+    newrelic:
+      enabled: true
+      license_key: "YOUR_KEY"
+    ```
+  </Card>
+  <Card title="CloudWatch" icon="aws">
+    ```yaml
+    cloudwatch:
+      enabled: true
+      region: "us-east-1"
+      namespace: "deployERP"
+    ```
+  </Card>
+</CardGroup>
+
+## Monitoring Best Practices
+
+<AccordionGroup>
+  <Accordion title="Set Meaningful Thresholds">
+    - Base thresholds on historical data
+    - Consider business hours vs off-hours
+    - Account for seasonal variations
+    - Review and adjust regularly
+  </Accordion>
+  <Accordion title="Avoid Alert Fatigue">
+    - Prioritize critical alerts
+    - Use appropriate severity levels
+    - Implement alert suppression
+    - Group related alerts
+  </Accordion>
+  <Accordion title="Monitor Business Metrics">
+    - Track application-specific KPIs
+    - Monitor user experience metrics
+    - Correlate technical and business metrics
+    - Create custom dashboards
+  </Accordion>
+  <Accordion title="Regular Reviews">
+    - Weekly performance reviews
+    - Monthly capacity planning
+    - Quarterly optimization assessments
+    - Annual architecture reviews
+  </Accordion>
+</AccordionGroup>
+
+## Troubleshooting
+
+### Common Monitoring Issues
+
+| Issue | Cause | Solution |
+|-------|-------|----------|
+| Missing metrics | Agent down | Restart deployERP agent |
+| Delayed alerts | Network issues | Check connectivity |
+| False positives | Incorrect thresholds | Adjust alert rules |
+| High cardinality | Too many labels | Reduce metric labels |
+
+### Monitoring Commands
+
+```bash
+# Check agent status
+systemctl status deployerp-agent
+
+# Test metric collection
+deployerp-agent test
+
+# Verify connectivity
+deployerp-agent ping
+
+# Debug mode
+deployerp-agent run --debug
+```
+
+## Related Documentation
+
+- [Alert Configuration](/servers/alerts)
+- [Performance Tuning](/guides/performance)
+- [Log Analysis](/advanced/logging)
+- [Capacity Planning](/guides/capacity-planning)

@@ -1,0 +1,433 @@
+---
+title: "Your First Deployment"
+description: "Complete walkthrough of deploying your first Odoo instance with deployERP"
+---
+
+## Introduction
+
+This guide walks you through deploying your first Odoo instance from start to finish. By the end, you'll have a fully functional Odoo server running on your chosen cloud provider.
+
+<Info>
+  **Time Required**: 15-20 minutes  
+  **Prerequisites**: deployERP account and cloud provider credentials
+</Info>
+
+## Before You Begin
+
+### What You'll Need
+
+<CardGroup cols={2}>
+  <Card title="deployERP Account" icon="user">
+    [Sign up free](https://app.deployerp.com/register) if you haven't already
+  </Card>
+  <Card title="Cloud Provider Account" icon="cloud">
+    AWS, DigitalOcean, Azure, or any supported provider
+  </Card>
+  <Card title="Domain Name" icon="globe">
+    Optional: Custom domain for your Odoo instance
+  </Card>
+  <Card title="Odoo License" icon="key">
+    Only if deploying Enterprise Edition
+  </Card>
+</CardGroup>
+
+## Step 1: Connect Your Cloud Provider
+
+Let's start by connecting your cloud provider to deployERP.
+
+<Steps>
+  <Step title="Navigate to Providers">
+    From your dashboard, go to **Settings → Cloud Providers**
+  </Step>
+  <Step title="Add New Provider">
+    Click **Add Provider** and select your cloud provider
+  </Step>
+  <Step title="Enter Credentials">
+    Follow the provider-specific instructions below
+  </Step>
+</Steps>
+
+<Tabs>
+  <Tab title="DigitalOcean">
+    **Easiest setup - Recommended for beginners**
+    
+    1. Log in to your DigitalOcean account
+    2. Go to **API → Tokens/Keys**
+    3. Generate a new token with read/write scope
+    4. Copy the token and paste in deployERP
+    5. Click **Test Connection**
+    
+    <Tip>
+      DigitalOcean offers $200 free credit for new users
+    </Tip>
+  </Tab>
+  <Tab title="AWS">
+    **Most features - Best for enterprises**
+    
+    1. Create an IAM user in AWS Console
+    2. Attach the `AmazonEC2FullAccess` policy
+    3. Create access keys
+    4. Enter Access Key ID and Secret Access Key
+    5. Select your preferred region
+    6. Click **Test Connection**
+    
+    <Warning>
+      Store your AWS credentials securely
+    </Warning>
+  </Tab>
+  <Tab title="Azure">
+    **Microsoft ecosystem integration**
+    
+    1. Register an app in Azure Active Directory
+    2. Create a service principal
+    3. Assign Contributor role to subscription
+    4. Enter Tenant ID, Client ID, and Client Secret
+    5. Click **Test Connection**
+  </Tab>
+</Tabs>
+
+## Step 2: Create Your Server
+
+Now let's provision a server to host your Odoo instance.
+
+### Choose Server Specifications
+
+<Info>
+  For your first deployment, we recommend starting with a **Medium** server (4 vCPU, 8GB RAM)
+</Info>
+
+1. Click **Servers** → **New Server**
+2. Configure your server:
+
+```yaml
+Name: my-first-odoo-server
+Provider: digitalocean  # or your chosen provider
+Region: nyc3           # choose closest to your users
+Size: medium           # 4 vCPU, 8GB RAM
+Python: 3.10          # for Odoo 16/17
+PostgreSQL: 14        # recommended version
+```
+
+3. Review the configuration:
+   - **Monthly Cost**: ~$48 (DigitalOcean)
+   - **Resources**: 4 vCPU, 8GB RAM, 160GB SSD
+   - **Location**: New York, USA
+
+4. Click **Create Server**
+
+### Monitor Provisioning Progress
+
+Watch your server come to life:
+
+```
+[====================] 100% Complete
+
+✓ Server created in DigitalOcean
+✓ Operating system installed
+✓ Security configured
+✓ Python 3.10 installed
+✓ PostgreSQL 14 installed
+✓ deployERP agent installed
+✓ Monitoring enabled
+
+Server ready! Time elapsed: 3m 24s
+```
+
+## Step 3: Deploy Odoo Instance
+
+With your server ready, let's deploy Odoo.
+
+### Quick Deployment
+
+1. From your server dashboard, click **New Instance**
+2. Configure your instance:
+
+<ParamField path="name" type="string" default="production">
+  Instance name (lowercase, no spaces)
+</ParamField>
+
+<ParamField path="version" type="string" default="17.0">
+  Odoo version - we recommend the latest
+</ParamField>
+
+<ParamField path="edition" type="string" default="community">
+  Community (free) or Enterprise (requires license)
+</ParamField>
+
+<ParamField path="admin_email" type="string" required>
+  Your email for admin access
+</ParamField>
+
+<ParamField path="timezone" type="string" default="America/New_York">
+  Your business timezone
+</ParamField>
+
+3. Click **Deploy Instance**
+
+### Deployment Progress
+
+Track the deployment:
+
+```
+Creating Odoo instance: production
+[====================] 100% Complete
+
+✓ Database created
+✓ Odoo 17.0 installed
+✓ Dependencies configured
+✓ Admin user created
+✓ SSL certificate issued
+✓ Instance started
+
+Instance URL: https://production-srv-abc123.deployerp.io
+Admin Password: [shown once - save this!]
+```
+
+<Warning>
+  **Important**: Save the admin password immediately. It's shown only once for security.
+</Warning>
+
+## Step 4: Access Your Odoo Instance
+
+Your Odoo instance is now live! Let's access it and complete the initial setup.
+
+### First Login
+
+1. Click the instance URL or copy it to your browser
+2. You'll see the Odoo login page
+3. Enter:
+   - **Email**: The admin email you specified
+   - **Password**: The generated password (saved earlier)
+
+### Initial Setup Wizard
+
+Odoo will guide you through initial configuration:
+
+<Steps>
+  <Step title="Company Information">
+    - Company name
+    - Address
+    - Phone and email
+    - Logo (optional)
+  </Step>
+  <Step title="Localization">
+    - Country
+    - Language
+    - Currency
+    - Fiscal positions
+  </Step>
+  <Step title="Apps Selection">
+    Choose your initial apps:
+    - **Sales**: Customer management and quotations
+    - **Accounting**: Financial management
+    - **Inventory**: Stock management
+    - **Website**: Public website builder
+  </Step>
+</Steps>
+
+## Step 5: Essential Configuration
+
+### Set Up Automated Backups
+
+Protect your data from day one:
+
+1. Go to **Servers → [Your Server] → Backups**
+2. Click **Configure Automated Backups**
+3. Set up daily backups:
+
+```yaml
+Schedule: Daily at 2:00 AM
+Retention: 30 days
+Storage: deployERP Managed (included)
+Encryption: Enabled
+```
+
+### Configure Custom Domain (Optional)
+
+Use your own domain instead of the default:
+
+1. In your instance settings, click **Custom Domain**
+2. Enter your domain: `odoo.yourcompany.com`
+3. Update your DNS records:
+
+```
+Type: A
+Name: odoo
+Value: [your-server-ip]
+TTL: 300
+```
+
+4. Click **Verify Domain**
+5. SSL certificate will be automatically issued
+
+### Add Team Members
+
+Invite your team to Odoo:
+
+1. In Odoo, go to **Settings → Users & Companies**
+2. Click **Invite Users**
+3. Enter email addresses
+4. Assign appropriate access rights:
+   - **User**: Regular employee access
+   - **Administrator**: Full system access
+   - **Portal**: External user access
+
+## Step 6: Install Essential Apps
+
+### Recommended Apps for New Users
+
+<CardGroup cols={2}>
+  <Card title="CRM" icon="users">
+    Track leads and opportunities
+  </Card>
+  <Card title="Sales" icon="shopping-cart">
+    Quotations and sales orders
+  </Card>
+  <Card title="Accounting" icon="calculator">
+    Invoicing and payments
+  </Card>
+  <Card title="Inventory" icon="box">
+    Stock management
+  </Card>
+  <Card title="Project" icon="tasks">
+    Task and project tracking
+  </Card>
+  <Card title="Website" icon="globe">
+    Build your web presence
+  </Card>
+</CardGroup>
+
+To install apps:
+1. Click the **Apps** menu in Odoo
+2. Search for the app name
+3. Click **Install**
+4. Wait for installation to complete
+
+## Monitoring Your Deployment
+
+### Server Health
+
+Monitor your server's performance:
+
+1. Go to **Servers → [Your Server] → Monitoring**
+2. View real-time metrics:
+   - CPU usage (should be < 70%)
+   - Memory usage (should be < 80%)
+   - Disk space (monitor growth)
+   - Response time (should be < 500ms)
+
+### Setting Up Alerts
+
+Configure alerts for critical events:
+
+```yaml
+CPU Alert:
+  Threshold: > 80%
+  Duration: 5 minutes
+  Action: Email notification
+
+Memory Alert:
+  Threshold: > 85%
+  Duration: 3 minutes
+  Action: Email + SMS
+
+Disk Space:
+  Threshold: > 80%
+  Action: Email notification
+```
+
+## What's Next?
+
+### Immediate Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Complete Odoo Setup" icon="check">
+    - Configure accounting
+    - Import initial data
+    - Set up email
+    - Customize reports
+  </Card>
+  <Card title="Security Hardening" icon="shield">
+    - Enable 2FA
+    - Review user permissions
+    - Set up IP restrictions
+    - Configure firewall rules
+  </Card>
+  <Card title="Performance Optimization" icon="rocket">
+    - Monitor usage patterns
+    - Adjust worker count
+    - Enable caching
+    - Optimize queries
+  </Card>
+  <Card title="Learn Odoo" icon="graduation-cap">
+    - Take Odoo tours
+    - Watch tutorials
+    - Read documentation
+    - Join community
+  </Card>
+</CardGroup>
+
+### Recommended Reading
+
+- [Instance Configuration Guide](/instances/configuration)
+- [Backup Best Practices](/backups/overview)
+- [Security Hardening](/guides/security-hardening)
+- [Performance Optimization](/guides/performance)
+
+## Troubleshooting
+
+### Common First-Time Issues
+
+<AccordionGroup>
+  <Accordion title="Can't access my instance">
+    - Check if the instance is running
+    - Verify firewall rules allow HTTPS
+    - Ensure DNS has propagated (if using custom domain)
+    - Try accessing via IP address directly
+  </Accordion>
+  <Accordion title="Forgot admin password">
+    - Use password reset from login page
+    - Or reset via deployERP dashboard
+    - Check email for reset link
+  </Accordion>
+  <Accordion title="Instance is slow">
+    - Check server resources in monitoring
+    - Increase worker count if CPU allows
+    - Enable Redis caching
+    - Review installed apps
+  </Accordion>
+  <Accordion title="Can't install apps">
+    - Ensure you're logged in as admin
+    - Check available disk space
+    - Verify Odoo version compatibility
+    - Check logs for specific errors
+  </Accordion>
+</AccordionGroup>
+
+## Getting Help
+
+If you need assistance:
+
+<CardGroup cols={3}>
+  <Card title="Documentation" icon="book" href="/docs">
+    Search our comprehensive docs
+  </Card>
+  <Card title="Support" icon="headset" href="https://app.deployerp.com/support">
+    Contact our support team
+  </Card>
+  <Card title="Community" icon="users" href="https://community.deployerp.com">
+    Ask the community
+  </Card>
+</CardGroup>
+
+## Congratulations! 🎉
+
+You've successfully deployed your first Odoo instance with deployERP. Your business management system is now:
+
+- ✅ Running on reliable cloud infrastructure
+- ✅ Secured with SSL encryption
+- ✅ Backed up automatically
+- ✅ Monitored 24/7
+- ✅ Ready for your business data
+
+Welcome to the deployERP family!
